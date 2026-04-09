@@ -32,11 +32,9 @@ const countRoutes = require("./routes/countRoutes");
 
 // ✅ CORS Configuration
 const allowedOrigins = [
-  "https://alumni-portal-frontend-khaki.vercel.app",
-  "https://alumni-frontend.vercel.app",
-  "https://alumni-portal-frontend-git-main-manishdeoraris-projects.vercel.app",
-  "https://alumni-portal-frontend-70ml39lrm-manishdeoraris-projects.vercel.app",
-  "https://alumni-portal-frontend-manishdeoraris-projects.vercel.app",
+  "https://student-portal-frontend-six.vercel.app",
+  //"https://alumni-portal-frontend-khaki.vercel.app",
+  //"https://alumni-frontend.vercel.app",
   "http://localhost:3000",
   "http://127.0.0.1:3000",
 ];
@@ -53,6 +51,7 @@ if (process.env.ALLOWED_ORIGINS) {
 
 // ✅ Dynamic Vercel subdomain patterns (catches ALL preview/branch URLs)
 const vercelPatterns = [
+  /^https:\/\/student-portal-frontend[\w-]*\.vercel\.app$/,
   /^https:\/\/alumni-portal-frontend[\w-]*\.vercel\.app$/,
   /^https:\/\/alumni-frontend[\w-]*\.vercel\.app$/,
   /^https:\/\/[\w-]*manishdeoraris-projects\.vercel\.app$/,
@@ -63,7 +62,7 @@ const corsOptions = {
     console.log(`📡 CORS Request from: ${origin || 'No Origin'}`);
     // Allow requests with no origin (like mobile apps or curl)
     if (!origin) return callback(null, true);
-    
+
     // 1. Check hardcoded list
     if (allowedOrigins.includes(origin)) {
       console.log(`✅ CORS Match found in allowedOrigins: ${origin}`);
@@ -77,8 +76,8 @@ const corsOptions = {
     }
 
     // 3. Check local/network IPs
-    const isLocal = 
-      origin.startsWith("http://localhost:") || 
+    const isLocal =
+      origin.startsWith("http://localhost:") ||
       origin.startsWith("http://127.0.0.1:") ||
       /^http:\/\/192\.168\.\d+\.\d+(:\d+)?$/.test(origin) ||
       /^http:\/\/10\.\d+\.\d+\.\d+(:\d+)?$/.test(origin) ||
