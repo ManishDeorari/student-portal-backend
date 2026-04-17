@@ -37,9 +37,9 @@ router.post("/year-end-rollover", authenticate, verifyAdmin, async (req, res) =>
       });
     }
 
-    const alumniUsers = await User.find({ role: "alumni" });
+    const studentUsers = await User.find({ role: "student" });
 
-    for (const user of alumniUsers) {
+    for (const user of studentUsers) {
       user.lastYearPoints = {
         year: currentYear,
         total: user.points.total,
@@ -52,7 +52,7 @@ router.post("/year-end-rollover", authenticate, verifyAdmin, async (req, res) =>
         contentContribution: 0,
         campusEngagement: 0,
         innovationSupport: 0,
-        alumniParticipation: 0,
+        studentParticipation: 0,
         total: 0,
       };
 
@@ -67,7 +67,7 @@ router.post("/year-end-rollover", authenticate, verifyAdmin, async (req, res) =>
 
     res.json({
       message: "✅ Year-end rollover completed",
-      usersProcessed: alumniUsers.length,
+      usersProcessed: studentUsers.length,
     });
   } catch (error) {
     console.error(error);

@@ -50,7 +50,7 @@ module.exports = async (req, res) => {
     }
 
     // ✅ Award Points Logic (Initial reaction only, to avoid farming on switches)
-    if (!wasInAnyBucket && !isSameEmoji && req.user.role === "alumni") {
+    if (!wasInAnyBucket && !isSameEmoji && req.user.role === "student") {
       try {
         const User = require("../../../../models/User");
         const PointsSystemConfig = require("../../../../models/PointsSystemConfig");

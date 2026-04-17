@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-// ===================== Points Schema (Alumni only) =====================
+// ===================== Points Schema (Student only) =====================
 const PointsSchema = new mongoose.Schema({
   profileCompletion: { type: Number, default: 0 },
   studentEngagement: { type: Number, default: 0 },
@@ -8,7 +8,7 @@ const PointsSchema = new mongoose.Schema({
   contentContribution: { type: Number, default: 0 },
   campusEngagement: { type: Number, default: 0 },
   innovationSupport: { type: Number, default: 0 },
-  alumniParticipation: { type: Number, default: 0 },
+  studentParticipation: { type: Number, default: 0 },
   connections: { type: Number, default: 0 },
   posts: { type: Number, default: 0 },
   comments: { type: Number, default: 0 },
@@ -91,7 +91,7 @@ const UserSchema = new mongoose.Schema(
     email: { type: String, unique: true, required: true },
     password: { type: String, required: true },
 
-    // Alumni-only field
+    // Student-only field
     enrollmentNumber: { type: String, unique: true, sparse: true },
 
     // Faculty-only field
@@ -126,8 +126,8 @@ const UserSchema = new mongoose.Schema(
     // Role & Permission
     role: {
       type: String,
-      enum: ["alumni", "faculty", "admin"],
-      default: "alumni",
+      enum: ["student", "faculty", "admin"],
+      default: "student",
     },
     isAdmin: {
       type: Boolean,
@@ -139,13 +139,13 @@ const UserSchema = new mongoose.Schema(
     },
     isMainAdmin: { type: Boolean, default: false },
 
-    // Points (Alumni only)
+    // Points (Student only)
     points: { type: PointsSchema, default: () => ({}) },
 
-    // Last Year Points (Alumni only)
+    // Last Year Points (Student only)
     lastYearPoints: { type: LastYearPointsSchema, default: null },
 
-    // Tracking for points (Alumni only)
+    // Tracking for points (Student only)
     postPointLogs: [{ type: Date }], // Dates when post points were awarded
     likePointLogs: [{ type: Date }], // Dates when like points were awarded
     commentPointLogs: [{ type: Date }], // Dates when comment points were awarded

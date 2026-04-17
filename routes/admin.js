@@ -39,12 +39,12 @@ const verifyMainAdmin = async (req, res, next) => {
   }
 };
 
-// ✅ 1️⃣ Get all pending users (faculty/alumni waiting for approval)
+// ✅ 1️⃣ Get all pending users (faculty/student waiting for approval)
 router.get("/pending-users", authenticate, verifyAdmin, async (req, res) => {
   try {
     const pendingUsers = await User.find({
       approved: false,
-      role: { $in: ["faculty", "alumni"] },
+      role: { $in: ["faculty", "student"] },
     }).select("-password");
     res.json(pendingUsers);
   } catch (error) {
@@ -116,7 +116,7 @@ router.put("/approve/:id", authenticate, verifyAdmin, async (req, res) => {
         sender: req.user._id,
         receiver: user._id,
         type: "account_approved",
-        message: "Your account has been approved! Welcome to the Alumni Portal community.",
+        message: "Your account has been approved! Welcome to the Student Portal community.",
       });
       await notice.save();
 
@@ -242,7 +242,7 @@ const performDeepDelete = async (userId) => {
   if (!user) return { success: false, id: userId, message: "User not found" };
 
   // Prevent deleting main admin
-  if (user.isMainAdmin || user.email === "admin@alumniportal.com" || user.email === "manishdeorari377@gmail.com") {
+  if (user.isMainAdmin || user.email === "admin@studentportal.com" || user.email === "manishdeorari377@gmail.com") {
     return { success: false, id: userId, message: "Cannot delete Main Admin" };
   }
 
@@ -517,10 +517,10 @@ router.post("/delete-users-bulk", authenticate, verifyAdmin, verifyMainAdmin, as
   });
 });
 
-// ✅ 6️⃣ Leaderboard — view top alumni by points
+// ✅ 6️⃣ Leaderboard — view top student by points
 router.get("/leaderboard", authenticate, verifyAdmin, async (req, res) => {
   try {
-    const topUsers = await User.find({ approved: true, role: "alumni", "points.total": { $gt: 0 } })
+    const topUsers = await User.find({ approved: true, role: "student", "points.total": { $gt: 0 } })
       .sort({ "points.total": -1 })
       .limit(50)
       .select("name email role points profilePicture");
@@ -543,11 +543,11 @@ router.get("/admins", authenticate, verifyAdmin, async (req, res) => {
   }
 });
 
-// 🏆 Last Year Leaderboard (Alumni only)
+// 🏆 Last Year Leaderboard (Student only)
 router.get("/leaderboard/last-year", authenticate, verifyAdmin, async (req, res) => {
   try {
     const users = await User.find({
-      role: "alumni",
+      role: "student",
       "lastYearPoints.total": { $gt: 0 },
     })
       .sort({ "lastYearPoints.total": -1 })
@@ -560,12 +560,12 @@ router.get("/leaderboard/last-year", authenticate, verifyAdmin, async (req, res)
   }
 });
 
-// ✅ 8️⃣ Export Alumni Data (Advanced Filtering)
-router.get("/export-alumni", authenticate, verifyAdmin, async (req, res) => {
+// ✅ 8️⃣ Export Student Data (Advanced Filtering)
+router.get("/export-student", authenticate, verifyAdmin, async (req, res) => {
   const { query, course, year, industry } = req.query;
 
   try {
-    const filter = { role: "alumni", approved: true };
+    const filter = { role: "student", approved: true };
 
     const conditions = [];
 

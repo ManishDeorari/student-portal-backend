@@ -20,7 +20,7 @@ const checkAdmin = (req, res, next) => {
 // @desc    Create a new group (Admin only)
 router.post("/", checkAuth, checkAdmin, async (req, res) => {
     try {
-        const { name, description, profileImage, profileImagePublicId, profileImageSettings, isAllAlumniGroup, isAllFacultyGroup, allowAlumniMessaging, allowFacultyMessaging } = req.body;
+        const { name, description, profileImage, profileImagePublicId, profileImageSettings, isAllStudentGroup, isAllFacultyGroup, allowStudentMessaging, allowFacultyMessaging } = req.body;
         
         // 🛑 Check for unique name
         const existingGroup = await Group.findOne({ name: { $regex: new RegExp(`^${name}$`, "i") } });
@@ -32,9 +32,9 @@ router.post("/", checkAuth, checkAdmin, async (req, res) => {
         let members = Array.isArray(req.body.members) ? req.body.members : [];
         
         // 🔄 Automatic Role Inclusion
-        if (isAllAlumniGroup || isAllFacultyGroup) {
+        if (isAllStudentGroup || isAllFacultyGroup) {
             const roleQuery = [];
-            if (isAllAlumniGroup) roleQuery.push("alumni");
+            if (isAllStudentGroup) roleQuery.push("student");
             if (isAllFacultyGroup) roleQuery.push("faculty");
             
             const targetedUsers = await User.find({ role: { $in: roleQuery } }, "_id");
@@ -56,7 +56,7 @@ router.post("/", checkAuth, checkAdmin, async (req, res) => {
             profileImagePublicId: profileImagePublicId || null,
             profileImageSettings: profileImageSettings || { x: 0, y: 0, zoom: 1, width: 100, height: 100 },
             members,
-            allowAlumniMessaging: allowAlumniMessaging !== undefined ? allowAlumniMessaging : false,
+            allowStudentMessaging: allowStudentMessaging !== undefined ? allowStudentMessaging : false,
             allowFacultyMessaging: allowFacultyMessaging !== undefined ? allowFacultyMessaging : false,
             admin: req.user.id
         });
@@ -193,9 +193,9 @@ router.post("/send", checkAuth, async (req, res) => {
             if (userRole === "faculty" && !group.allowFacultyMessaging) {
                 return res.status(403).json({ message: "Messaging is disabled for faculty in this group" });
             }
-            // Alumni check
-            if (userRole === "alumni" && !group.allowAlumniMessaging) {
-                return res.status(403).json({ message: "Messaging is disabled for alumni in this group" });
+            // Student check
+            if (userRole === "student" && !group.allowStudentMessaging) {
+                return res.status(403).json({ message: "Messaging is disabled for student in this group" });
             }
         }
 
@@ -229,7 +229,7 @@ router.post("/send", checkAuth, async (req, res) => {
 // @desc    Update group settings (Admin only)
 router.put("/:groupId/settings", checkAuth, checkAdmin, async (req, res) => {
     try {
-        const { allowFacultyMessaging, allowAlumniMessaging, description, name, profileImage, profileImagePublicId, profileImageSettings, oldImageUrl, isAllAlumni, isAllFaculty } = req.body;
+        const { allowFacultyMessaging, allowStudentMessaging, description, name, profileImage, profileImagePublicId, profileImageSettings, oldImageUrl, isAllStudent, isAllFaculty } = req.body;
         
         // 🛑 Check for unique name if it's being changed
         if (name) {
@@ -257,7 +257,7 @@ router.put("/:groupId/settings", checkAuth, checkAdmin, async (req, res) => {
             }
         }
 
-        const updateData = { allowFacultyMessaging, allowAlumniMessaging, description, name };
+        const updateData = { allowFacultyMessaging, allowStudentMessaging, description, name };
         if (profileImage !== undefined) updateData.profileImage = profileImage || "/default-group.jpg";
         if (profileImagePublicId !== undefined) updateData.profileImagePublicId = profileImagePublicId;
         if (profileImageSettings !== undefined) updateData.profileImageSettings = profileImageSettings;
@@ -268,9 +268,9 @@ router.put("/:groupId/settings", checkAuth, checkAdmin, async (req, res) => {
         );
 
         // 🔄 Automatic Role Inclusion
-        if (isAllAlumni || isAllFaculty) {
+        if (isAllStudent || isAllFaculty) {
             const roles = [];
-            if (isAllAlumni) roles.push("alumni");
+            if (isAllStudent) roles.push("student");
             if (isAllFaculty) roles.push("faculty");
             const targetedUsers = await User.find({ role: { $in: roles } }, "_id");
             const targetedIds = targetedUsers.map(u => u._id);
@@ -294,14 +294,14 @@ router.put("/:groupId/settings", checkAuth, checkAdmin, async (req, res) => {
 // @desc    Invite/Add members to group (Admin only)
 router.post("/:groupId/invite", checkAuth, checkAdmin, async (req, res) => {
     try {
-        const { userIds, selectAll, isAllAlumni, isAllFaculty } = req.body;
+        const { userIds, selectAll, isAllStudent, isAllFaculty } = req.body;
         let membersToAdd = userIds || [];
         
-        if (selectAll || isAllAlumni || isAllFaculty) {
+        if (selectAll || isAllStudent || isAllFaculty) {
             const query = {};
             if (!selectAll) {
                 const roles = [];
-                if (isAllAlumni) roles.push("alumni");
+                if (isAllStudent) roles.push("student");
                 if (isAllFaculty) roles.push("faculty");
                 query.role = { $in: roles };
             }
@@ -633,7 +633,7 @@ router.delete("/:groupId", checkAuth, checkAdmin, async (req, res) => {
 router.post("/:groupId/remove-role", checkAuth, checkAdmin, async (req, res) => {
     try {
         const { role } = req.body;
-        if (!["alumni", "faculty"].includes(role)) {
+        if (!["student", "faculty"].includes(role)) {
             return res.status(400).json({ message: "Invalid role specified" });
         }
 

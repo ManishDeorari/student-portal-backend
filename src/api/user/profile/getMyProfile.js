@@ -6,9 +6,9 @@ module.exports = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
     
-    // ✅ DAILY LOGIN POINTS LOGIC (Alumni Only)
+    // ✅ DAILY LOGIN POINTS LOGIC (Student Only)
     let loginPointsAwarded = 0;
-    if (user.role === "alumni") {
+    if (user.role === "student") {
       const today = new Date().setHours(0, 0, 0, 0);
       const lastAwarded = user.lastLoginPointAwardedAt ? new Date(user.lastLoginPointAwardedAt).setHours(0, 0, 0, 0) : null;
 

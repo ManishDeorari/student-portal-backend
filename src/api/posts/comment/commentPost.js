@@ -47,7 +47,7 @@ const commentPost = async (req, res) => {
     }
 
     // ✅ Award Points Logic (using User model and PointsSystemConfig)
-    if (req.user.role === "alumni") {
+    if (req.user.role === "student") {
       try {
         const User = require("../../../../models/User");
         const PointsSystemConfig = require("../../../../models/PointsSystemConfig");

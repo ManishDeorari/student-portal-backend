@@ -15,8 +15,8 @@ router.post("/signup", async (req, res) => {
       return res.status(400).json({ message: "All required fields must be provided" });
     }
 
-    if (!["alumni", "faculty"].includes(role)) {
-      return res.status(400).json({ message: "Invalid role — must be 'alumni' or 'faculty'" });
+    if (!["student", "faculty"].includes(role)) {
+      return res.status(400).json({ message: "Invalid role — must be 'student' or 'faculty'" });
     }
 
     // Check for unique email
@@ -24,9 +24,9 @@ router.post("/signup", async (req, res) => {
     if (existingUser)
       return res.status(409).json({ message: "User already exists with this email" });
 
-    // Alumni must have enrollment number
-    if (role === "alumni" && !enrollmentNumber) {
-      return res.status(400).json({ message: "Enrollment number is required for alumni" });
+    // Student must have enrollment number
+    if (role === "student" && !enrollmentNumber) {
+      return res.status(400).json({ message: "Enrollment number is required for student" });
     }
 
     // Faculty must have employee ID
@@ -39,7 +39,7 @@ router.post("/signup", async (req, res) => {
 
     // Generate publicId (name-slug + enrollment/employee ID for uniqueness)
     const nameSlug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const idSuffix = role === "alumni" ? enrollmentNumber : employeeId;
+    const idSuffix = role === "student" ? enrollmentNumber : employeeId;
     const baseSlug = `${nameSlug}-${idSuffix}`;
     let publicId = baseSlug;
     
@@ -63,7 +63,7 @@ router.post("/signup", async (req, res) => {
       email,
       password: hashedPassword,
       role,
-      enrollmentNumber: role === "alumni" ? enrollmentNumber : undefined,
+      enrollmentNumber: role === "student" ? enrollmentNumber : undefined,
       employeeId: role === "faculty" ? employeeId : undefined,
       isAdmin: false,
       approved: false,

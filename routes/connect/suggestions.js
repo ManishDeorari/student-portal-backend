@@ -17,12 +17,12 @@ router.get("/", authMiddleware, async (req, res) => {
       ...(currentUser.pendingRequests || []).map(id => id.toString())
     ];
 
-    // 1. Random Recommendations (Alumni only)
+    // 1. Random Recommendations (Student only)
     const randomRecommendations = await User.aggregate([
       {
         $match: {
           _id: { $nin: excludeIds.map(id => new (require("mongoose")).Types.ObjectId(id)) },
-          role: "alumni",
+          role: "student",
           approved: true
         }
       },
@@ -54,7 +54,7 @@ router.get("/", authMiddleware, async (req, res) => {
     // 3. Related People (Same course or industry)
     const relatedPeople = await User.find({
       _id: { $nin: [...excludeIds, ...randomRecommendations.map(u => u._id.toString()), ...facultyAndAdmin.map(u => u._id.toString())] },
-      role: "alumni",
+      role: "student",
       approved: true,
       $or: [
         { course: currentUser.course },

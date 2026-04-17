@@ -19,7 +19,7 @@ const createPost = async (req, res) => {
     // Role-based validation for post type
     let finalType = "Regular";
     if (type && type !== "Regular") {
-      if (type === "Session" && userRole === "alumni") {
+      if (type === "Session" && userRole === "student") {
         finalType = "Session";
       } else if (type === "Event" && (userRole === "faculty" || isAdmin)) {
         finalType = "Event";
@@ -90,7 +90,7 @@ const createPost = async (req, res) => {
     }
 
     // ✅ Award Points Logic
-    if (userRole === "alumni") {
+    if (userRole === "student") {
       try {
         const user = await User.findById(req.user._id || req.user.id);
         const config = (await PointsSystemConfig.findOne()) || { postPoints: 10, postLimitCount: 3, postLimitDays: 7 };

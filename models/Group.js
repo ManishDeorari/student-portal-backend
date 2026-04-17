@@ -30,7 +30,7 @@ const groupSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    allowAlumniMessaging: {
+    allowStudentMessaging: {
         type: Boolean,
         default: true,
     },

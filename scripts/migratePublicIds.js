@@ -23,7 +23,7 @@ async function runMigration() {
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/(^-|-$)/g, "");
 
-      // For alumni, use enrollmentNumber. For faculty, use employeeId.
+      // For student, use enrollmentNumber. For faculty, use employeeId.
       const idSuffix = user.role === "faculty" ? user.employeeId : user.enrollmentNumber;
       
       // Combine name slug and ID suffix. Fallback to name slug if ID is somehow missing.

@@ -32,7 +32,7 @@ const replyToComment = async (req, res) => {
     req.io.emit("postUpdated", updated);
 
     // ✅ Award Points Logic
-    if (req.user.role === "alumni") {
+    if (req.user.role === "student") {
       try {
         const User = require("../../../../models/User");
         const PointsSystemConfig = require("../../../../models/PointsSystemConfig");

@@ -48,7 +48,7 @@ const reactToReply = async (req, res) => {
     const replyOwnerId = reply.user?._id ? reply.user._id.toString() : reply.user.toString();
 
     // ✅ Award Points Logic (Initial reaction only)
-    if (!wasInAnyBucket && !isSameEmoji && req.user.role === "alumni") {
+    if (!wasInAnyBucket && !isSameEmoji && req.user.role === "student") {
       try {
         const User = require("../../../../models/User");
         const PointsSystemConfig = require("../../../../models/PointsSystemConfig");

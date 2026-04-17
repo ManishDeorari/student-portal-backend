@@ -36,7 +36,7 @@ const approvePointsRequest = async (req, res) => {
       
       let message = "Your points request was declined by the Admin.";
       if (post.type === "Session") {
-        message = "Your Alumni Session points request was declined by the Admin.";
+        message = "Your Student Session points request was declined by the Admin.";
       } else if (post.announcementDetails) {
         const eventName = post.announcementDetails.eventName || "an event";
         message = `Your points request for event "${eventName}" was declined by the Admin.`;
@@ -140,7 +140,7 @@ const approvePointsRequest = async (req, res) => {
             if (user) {
               if (!user.points) user.points = { total: 0 };
               user.points.total = (user.points.total || 0) + pointsToAward;
-              user.points.alumniParticipation = (user.points.alumniParticipation || 0) + pointsToAward;
+              user.points.studentParticipation = (user.points.studentParticipation || 0) + pointsToAward;
               await user.save();
 
               const eventName = post.announcementDetails?.eventName || "an event";
@@ -161,7 +161,7 @@ const approvePointsRequest = async (req, res) => {
                 req.io.to(userRoom).emit("pointsUpdated", {
                   totalPoints: user.points.total,
                   awardedPoints: pointsToAward,
-                  category: "alumniParticipation",
+                  category: "studentParticipation",
                   reason: `Achievement in ${eventName}`
                 });
               }

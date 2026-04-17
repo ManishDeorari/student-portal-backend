@@ -82,7 +82,7 @@ router.post("/", authenticate, async (req, res) => {
     const pointsToAdd = config.connectionPoints || 10;
 
     const awardPoints = async (user) => {
-      if (user.role === "alumni") {
+      if (user.role === "student") {
         if (!user.points) user.points = { total: 0 };
         user.points.total = (user.points.total || 0) + pointsToAdd;
 

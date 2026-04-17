@@ -128,11 +128,11 @@ router.post("/manual-award", authenticate, verifyMainAdmin, async (req, res) => 
                 { name: search },
                 { enrollmentNumber: search }
             ],
-            role: "alumni"
+            role: "student"
         });
 
         if (!user) {
-            return res.status(404).json({ message: "Alumni not found" });
+            return res.status(404).json({ message: "Student not found" });
         }
 
         if (!user.points) user.points = { total: 0 };
@@ -146,7 +146,7 @@ router.post("/manual-award", authenticate, verifyMainAdmin, async (req, res) => 
         const categories = [
             "profileCompletion", "studentEngagement", "referrals",
             "contentContribution", "campusEngagement", "innovationSupport",
-            "alumniParticipation", "connections", "posts", "comments",
+            "studentParticipation", "connections", "posts", "comments",
             "likes", "replies", "penalty", "other"
         ];
 
@@ -193,11 +193,11 @@ router.post("/manual-penalty", authenticate, verifyMainAdmin, async (req, res) =
                 { name: search },
                 { enrollmentNumber: search }
             ],
-            role: "alumni"
+            role: "student"
         });
 
         if (!user) {
-            return res.status(404).json({ message: "Alumni not found" });
+            return res.status(404).json({ message: "Student not found" });
         }
 
         if (!user.points) user.points = { total: 0 };
@@ -210,7 +210,7 @@ router.post("/manual-penalty", authenticate, verifyMainAdmin, async (req, res) =
         const categories = [
             "profileCompletion", "studentEngagement", "referrals",
             "contentContribution", "campusEngagement", "innovationSupport",
-            "alumniParticipation", "connections", "posts", "comments",
+            "studentParticipation", "connections", "posts", "comments",
             "likes", "replies", "penalty", "other"
         ];
 
@@ -252,9 +252,9 @@ router.post("/trigger-rollover", authenticate, verifyMainAdmin, async (req, res)
         const now = new Date();
 
         const currentYear = now.getFullYear().toString();
-        const alumniUsers = await User.find({ role: "alumni" });
+        const studentUsers = await User.find({ role: "student" });
 
-        for (const user of alumniUsers) {
+        for (const user of studentUsers) {
             // Copy current points to last year
             user.lastYearPoints = {
                 year: currentYear,
@@ -269,7 +269,7 @@ router.post("/trigger-rollover", authenticate, verifyMainAdmin, async (req, res)
                 contentContribution: 0,
                 campusEngagement: 0,
                 innovationSupport: 0,
-                alumniParticipation: 0,
+                studentParticipation: 0,
                 connections: 0,
                 posts: 0,
                 comments: 0,
@@ -338,7 +338,7 @@ router.post("/trigger-rollover", authenticate, verifyMainAdmin, async (req, res)
             await config.save();
         }
 
-        res.json({ message: "Rollover executed successfully", usersProcessed: alumniUsers.length });
+        res.json({ message: "Rollover executed successfully", usersProcessed: studentUsers.length });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Rollover failed" });
@@ -348,16 +348,16 @@ router.post("/trigger-rollover", authenticate, verifyMainAdmin, async (req, res)
 // Sync all users' points (fix discrepancies)
 router.post("/sync-points", authenticate, verifyMainAdmin, async (req, res) => {
     try {
-        const alumniUsers = await User.find({ role: "alumni" });
+        const studentUsers = await User.find({ role: "student" });
         const categories = [
             "profileCompletion", "studentEngagement", "referrals",
             "contentContribution", "campusEngagement", "innovationSupport",
-            "alumniParticipation", "connections", "posts", "comments",
+            "studentParticipation", "connections", "posts", "comments",
             "likes", "replies", "penalty", "other"
         ];
 
         let syncedCount = 0;
-        for (const user of alumniUsers) {
+        for (const user of studentUsers) {
             if (!user.points) user.points = { total: 0 };
 
             const currentTotal = user.points.total || 0;

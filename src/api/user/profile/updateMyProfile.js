@@ -68,7 +68,7 @@ module.exports = async (req, res) => {
     }).select("-password");
 
     // ✅ Award Points Logic (Strict Checklist)
-    if (updatedUser.role === "alumni" && !updatedUser.profileCompletionAwarded) {
+    if (updatedUser.role === "student" && !updatedUser.profileCompletionAwarded) {
       const config = await PointsSystemConfig.findOne() || { profileCompletionPoints: 50 };
 
       const hasProfilePic = updatedUser.profilePicture && !updatedUser.profilePicture.includes("default-profile.jpg");

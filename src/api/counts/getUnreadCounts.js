@@ -40,7 +40,7 @@ const getUnreadCounts = async (req, res) => {
     if (user.isAdmin || user.role === "admin") {
       adminSignupRequestsCount = await User.countDocuments({
         approved: false,
-        role: { $in: ["alumni", "faculty"] },
+        role: { $in: ["student", "faculty"] },
         createdAt: { $gt: user.lastSeenAdminRequestsAt || new Date(0) }
       });
     }
