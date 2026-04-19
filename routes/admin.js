@@ -673,8 +673,7 @@ router.put("/bulk-semester", authenticate, verifyAdmin, verifyMainAdmin, async (
           message: `Academic Update: Your semester has been ${action === "increase" ? "increased" : "decreased"}. You are now in Semester ${student.semester}.`,
           sender: { 
             _id: req.user._id, 
-            name: "Admin Portal", 
-            profilePicture: "/admin-avatar.jpg" // You can adjust this
+            name: "Admin Portal"
           },
           createdAt: new Date()
         });
@@ -683,8 +682,7 @@ router.put("/bulk-semester", authenticate, verifyAdmin, verifyMainAdmin, async (
           message: `Academic Update: Your semester has been ${action === "increase" ? "increased" : "decreased"}. You are now in Semester ${student.semester}.`,
           sender: { 
             _id: req.user._id, 
-            name: "Admin Portal",
-            profilePicture: "/admin-avatar.jpg"
+            name: "Admin Portal"
           },
           createdAt: new Date()
         });
