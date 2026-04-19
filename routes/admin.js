@@ -523,7 +523,7 @@ router.get("/leaderboard", authenticate, verifyAdmin, async (req, res) => {
     const topUsers = await User.find({ approved: true, role: "student", "points.total": { $gt: 0 } })
       .sort({ "points.total": -1 })
       .limit(50)
-      .select("name email role points profilePicture");
+      .select("name email role points profilePicture course semester section");
     res.json(topUsers);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch leaderboard" });
@@ -536,7 +536,7 @@ router.get("/admins", authenticate, verifyAdmin, async (req, res) => {
     const users = await User.find({
       role: { $in: ["faculty", "admin"] },
       isMainAdmin: { $ne: true }, // ✅ exclude main admin
-    }).select("name email role isAdmin employeeId");
+    }).select("name email role isAdmin employeeId position department");
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch admins" });
@@ -552,7 +552,7 @@ router.get("/leaderboard/last-year", authenticate, verifyAdmin, async (req, res)
     })
       .sort({ "lastYearPoints.total": -1 })
       .limit(50)
-      .select("name email profilePicture lastYearPoints");
+      .select("name email profilePicture lastYearPoints course semester section");
 
     res.json(users);
   } catch (error) {
@@ -611,7 +611,7 @@ router.get("/export-student", authenticate, verifyAdmin, async (req, res) => {
     if (industry) filter["workProfile.industry"] = { $regex: new RegExp(industry, "i") };
 
     const users = await User.find(filter)
-      .select("publicId name email enrollmentNumber phone whatsapp linkedin address education experience workProfile jobPreferences course year")
+      .select("publicId name email enrollmentNumber phone whatsapp linkedin address education experience workProfile jobPreferences course semester section year")
       .sort({ name: 1 });
 
     res.json(users);
