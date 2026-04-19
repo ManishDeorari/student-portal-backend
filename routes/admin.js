@@ -199,7 +199,7 @@ router.put("/remove-admin/:id", authenticate, verifyAdmin, verifyMainAdmin, asyn
     if (!user) return res.status(404).json({ message: "User not found" });
 
     // 🛡 Prevent removing main admin
-    if (user.isMainAdmin || user.email === "manishdeorari377@gmail.com") {
+    if (user.isMainAdmin) {
       return res.status(403).json({ message: "Cannot demote Main Admin" });
     }
 
@@ -242,7 +242,7 @@ const performDeepDelete = async (userId) => {
   if (!user) return { success: false, id: userId, message: "User not found" };
 
   // Prevent deleting main admin
-  if (user.isMainAdmin || user.email === "admin@studentportal.com" || user.email === "manishdeorari377@gmail.com") {
+  if (user.isMainAdmin) {
     return { success: false, id: userId, message: "Cannot delete Main Admin" };
   }
 
