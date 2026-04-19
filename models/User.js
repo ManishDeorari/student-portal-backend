@@ -102,6 +102,10 @@ const UserSchema = new mongoose.Schema(
     job: String,
     course: String,
     year: String,
+    semester: Number,
+    section: String,
+    position: String,
+    department: String,
     profilePicture: String,
     bannerImage: String,
 

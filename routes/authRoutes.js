@@ -8,7 +8,7 @@ const router = express.Router();
 // ======================== SIGNUP ==========================
 router.post("/signup", async (req, res) => {
   try {
-    const { name, email, password, enrollmentNumber, employeeId, role } = req.body;
+    const { name, email, password, enrollmentNumber, employeeId, role, position, department, course, semester, section } = req.body;
 
     // Validation
     if (!name || !email || !password || !role) {
@@ -65,6 +65,11 @@ router.post("/signup", async (req, res) => {
       role,
       enrollmentNumber: role === "student" ? enrollmentNumber : undefined,
       employeeId: role === "faculty" ? employeeId : undefined,
+      position: (role === "faculty" || role === "admin") ? position : undefined,
+      department: (role === "faculty" || role === "admin") ? department : undefined,
+      course: role === "student" ? course : undefined,
+      semester: role === "student" ? semester : undefined,
+      section: role === "student" ? section : undefined,
       isAdmin: false,
       approved: false,
     });
