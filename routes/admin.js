@@ -667,10 +667,25 @@ router.put("/bulk-semester", authenticate, verifyAdmin, verifyMainAdmin, async (
 
       // Emit Live Socket Notifications
       students.forEach(student => {
-        req.io.to(student._id.toString()).emit("notification", {
+        req.io.to(student._id.toString()).emit("newNotification", {
+          _id: notifications.find(n => n.receiver === student._id)?._id || Math.random(),
           type: "academic_update",
           message: `Academic Update: Your semester has been ${action === "increase" ? "increased" : "decreased"}. You are now in Semester ${student.semester}.`,
-          sender: { _id: req.user._id, name: "Admin" },
+          sender: { 
+            _id: req.user._id, 
+            name: "Admin Portal", 
+            profilePicture: "/admin-avatar.jpg" // You can adjust this
+          },
+          createdAt: new Date()
+        });
+        req.io.to(student._id.toString()).emit("liveNotification", {
+          type: "academic_update",
+          message: `Academic Update: Your semester has been ${action === "increase" ? "increased" : "decreased"}. You are now in Semester ${student.semester}.`,
+          sender: { 
+            _id: req.user._id, 
+            name: "Admin Portal",
+            profilePicture: "/admin-avatar.jpg"
+          },
           createdAt: new Date()
         });
       });
@@ -724,16 +739,14 @@ router.put("/update-user/:id", authenticate, verifyAdmin, verifyMainAdmin, async
         sender: req.user._id,
         receiver: user._id,
         type: "academic_update",
-        message: `Profile Update: Your account details (${user.role === 'student' ? 'Course/Semester' : 'Position/Department'}) have been updated by the Admin.`
+        message: `Profile Update: Your account details have been updated by the Admin.`
       });
       await newNotif.save();
 
-      req.io.to(user._id.toString()).emit("notification", {
-        type: "academic_update",
-        message: `Profile Update: Your account details (${user.role === 'student' ? 'Course/Semester' : 'Position/Department'}) have been updated by the Admin.`,
-        sender: { _id: req.user._id, name: "Admin" },
-        createdAt: new Date()
-      });
+      const populatedNotif = await Notification.findById(newNotif._id).populate("sender", "name profilePicture");
+
+      req.io.to(user._id.toString()).emit("newNotification", populatedNotif);
+      req.io.to(user._id.toString()).emit("liveNotification", populatedNotif);
     } catch (notifErr) {
       console.error("User update notification error:", notifErr);
     }
