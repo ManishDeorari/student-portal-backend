@@ -621,5 +621,81 @@ router.get("/export-student", authenticate, verifyAdmin, async (req, res) => {
   }
 });
 
+// ✅ 9️⃣ Bulk Semester Update (Increase/Decrease) - RESTRICTED TO MAIN ADMIN
+router.put("/bulk-semester", authenticate, verifyAdmin, verifyMainAdmin, async (req, res) => {
+  const { action } = req.body;
+  if (!["increase", "decrease"].includes(action)) {
+    return res.status(400).json({ message: "Invalid action. Use 'increase' or 'decrease'." });
+  }
+
+  try {
+    // We use an aggregation-style update to enforce boundaries (1-10)
+    const result = await User.updateMany(
+      { role: "student", approved: true },
+      [
+        {
+          $set: {
+            semester: {
+              $cond: {
+                if: { $eq: [action, "increase"] },
+                then: { $min: [10, { $add: [{ $ifNull: ["$semester", 1] }, 1] }] },
+                else: { $max: [1, { $subtract: [{ $ifNull: ["$semester", 1] }, 1] }] }
+              }
+            }
+          }
+        }
+      ]
+    );
+
+    res.json({
+      message: `Successfully executed bulk ${action} for students.`,
+      modifiedCount: result.modifiedCount
+    });
+  } catch (err) {
+    console.error("Bulk semester update error:", err);
+    res.status(500).json({ message: "Failed to execute bulk update" });
+  }
+});
+
+// ✅ 🔟 Admin Update User (Edit student/faculty details) - RESTRICTED TO MAIN ADMIN
+router.put("/update-user/:id", authenticate, verifyAdmin, verifyMainAdmin, async (req, res) => {
+  try {
+    const { 
+      name, 
+      email, 
+      semester, 
+      course, 
+      position, 
+      department,
+      enrollmentNumber,
+      employeeId
+    } = req.body;
+
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Update common fields
+    if (name) user.name = name;
+    if (email) user.email = email;
+
+    // Role-specific fields
+    if (user.role === "student") {
+      if (semester !== undefined) user.semester = Number(semester);
+      if (course) user.course = course.toUpperCase();
+      if (enrollmentNumber) user.enrollmentNumber = enrollmentNumber;
+    } else if (user.role === "faculty" || user.role === "admin") {
+      if (position) user.position = position;
+      if (department) user.department = department;
+      if (employeeId) user.employeeId = employeeId;
+    }
+
+    await user.save();
+    res.json({ message: "User updated successfully", user });
+  } catch (err) {
+    console.error("Admin user update error:", err);
+    res.status(500).json({ message: "Failed to update user" });
+  }
+});
+
 module.exports = router;
 
