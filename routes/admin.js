@@ -651,6 +651,33 @@ router.put("/bulk-semester", authenticate, verifyAdmin, verifyMainAdmin, async (
       message: `Successfully executed bulk ${action} for students.`,
       modifiedCount: result.modifiedCount
     });
+
+    // 🚀 Send Notifications to all Students
+    try {
+      const students = await User.find({ role: "student", approved: true }, "_id semester name");
+      
+      const notifications = students.map(student => ({
+        sender: req.user._id,
+        receiver: student._id,
+        type: "academic_update",
+        message: `Academic Update: Your semester has been ${action === "increase" ? "increased" : "decreased"}. You are now in Semester ${student.semester}.`
+      }));
+
+      await Notification.insertMany(notifications);
+
+      // Emit Live Socket Notifications
+      students.forEach(student => {
+        req.io.to(student._id.toString()).emit("notification", {
+          type: "academic_update",
+          message: `Academic Update: Your semester has been ${action === "increase" ? "increased" : "decreased"}. You are now in Semester ${student.semester}.`,
+          sender: { _id: req.user._id, name: "Admin" },
+          createdAt: new Date()
+        });
+      });
+    } catch (notifErr) {
+      console.error("Bulk notification error:", notifErr);
+    }
+
   } catch (err) {
     console.error("Bulk semester update error:", err);
     res.status(500).json({ message: "Failed to execute bulk update" });
@@ -690,6 +717,27 @@ router.put("/update-user/:id", authenticate, verifyAdmin, verifyMainAdmin, async
     }
 
     await user.save();
+    
+    // 🚀 Send Notification to the specific user
+    try {
+      const newNotif = new Notification({
+        sender: req.user._id,
+        receiver: user._id,
+        type: "academic_update",
+        message: `Profile Update: Your account details (${user.role === 'student' ? 'Course/Semester' : 'Position/Department'}) have been updated by the Admin.`
+      });
+      await newNotif.save();
+
+      req.io.to(user._id.toString()).emit("notification", {
+        type: "academic_update",
+        message: `Profile Update: Your account details (${user.role === 'student' ? 'Course/Semester' : 'Position/Department'}) have been updated by the Admin.`,
+        sender: { _id: req.user._id, name: "Admin" },
+        createdAt: new Date()
+      });
+    } catch (notifErr) {
+      console.error("User update notification error:", notifErr);
+    }
+
     res.json({ message: "User updated successfully", user });
   } catch (err) {
     console.error("Admin user update error:", err);
