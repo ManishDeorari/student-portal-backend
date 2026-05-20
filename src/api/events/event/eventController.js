@@ -377,6 +377,88 @@ const reactToReplyOnEvent = async (req, res) => {
   }
 };
 
+const pinCommentOnEvent = async (req, res) => {
+  try {
+    const { id: eventId, commentId } = req.params;
+    const userId = req.user._id;
+
+    const event = await Event.findById(eventId);
+    if (!event) return res.status(404).json({ error: "Event not found" });
+
+    // Check authorization: ONLY the event creator can pin/unpin comments
+    if (event.createdBy.toString() !== userId.toString()) {
+      return res.status(403).json({ error: "Only the event owner can pin or unpin comments." });
+    }
+
+    const comment = event.comments.id(commentId);
+    if (!comment) return res.status(404).json({ error: "Comment not found" });
+
+    const isCurrentlyPinned = !!comment.isPinned;
+
+    if (!isCurrentlyPinned) {
+      // Pinning: limit 3
+      const pinnedCount = event.comments.filter(c => c.isPinned).length;
+      if (pinnedCount >= 3) {
+        return res.status(400).json({ error: "You can only pin up to 3 comments." });
+      }
+      comment.isPinned = true;
+    } else {
+      // Unpinning
+      comment.isPinned = false;
+    }
+
+    await event.save();
+
+    const updatedEvent = await Event.findById(eventId)
+      .populate("createdBy", "name profilePicture")
+      .populate({ path: "comments.user", select: "name profilePicture" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture" });
+
+    const eventResp = await getEventMetadata(updatedEvent, req.user?._id);
+    const broadcastEvent = { ...eventResp, isRegistered: undefined, myRegistration: undefined };
+
+    if (req.io) {
+      req.io.emit("updatePost", broadcastEvent);
+    }
+
+    // Trigger Notification for the comment author (if not the event creator)
+    if (comment.user.toString() !== userId.toString()) {
+      try {
+        const Notification = require("../../../../models/Notification");
+        const type = comment.isPinned ? "comment_pinned" : "comment_unpinned";
+        const messageText = comment.isPinned
+          ? `${req.user.name} pinned your comment on their event post.`
+          : `${req.user.name} unpinned your comment on their event post.`;
+
+        const newNotification = new Notification({
+          sender: userId,
+          receiver: comment.user,
+          type: type,
+          message: messageText,
+          postId: eventId,
+          commentId: commentId
+        });
+
+        await newNotification.save();
+
+        if (req.io) {
+          const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture");
+          const targetRoom = comment.user.toString();
+          req.io.to(targetRoom).emit("newNotification", populatedNotification);
+          req.io.to(targetRoom).emit("liveNotification", populatedNotification);
+        }
+      } catch (noteErr) {
+        console.error("❌ Failed to log event comment pin notification:", noteErr.message);
+      }
+    }
+
+    res.json(eventResp);
+  } catch (error) {
+    console.error("Event comment pin error:", error.message);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
 module.exports = {
   reactToEvent,
   commentOnEvent,
@@ -388,4 +470,5 @@ module.exports = {
   editReplyOnEvent,
   deleteReplyOnEvent,
   reactToReplyOnEvent,
+  pinCommentOnEvent,
 };

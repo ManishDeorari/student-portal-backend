@@ -28,7 +28,9 @@ const NotificationSchema = new mongoose.Schema({
       "promotion",
       "demotion",
       "account_approved",
-      "academic_update"
+      "academic_update",
+      "comment_pinned",
+      "comment_unpinned"
     ]
   },
   groupId: { type: mongoose.Schema.Types.ObjectId, ref: "Group" },

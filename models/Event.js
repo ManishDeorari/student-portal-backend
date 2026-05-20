@@ -20,6 +20,7 @@ const commentSchema = new mongoose.Schema({
     },
     parentId: { type: mongoose.Schema.Types.ObjectId, ref: "Comment" },
   }],
+  isPinned: { type: Boolean, default: false },
 }, { 
   toObject: { flattenMaps: true },
   toJSON: { flattenMaps: true }

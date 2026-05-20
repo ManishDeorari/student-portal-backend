@@ -15,7 +15,8 @@ const {
   reactToCommentOnEvent,
   editReplyOnEvent,
   deleteReplyOnEvent,
-  reactToReplyOnEvent
+  reactToReplyOnEvent,
+  pinCommentOnEvent
 } = require("../src/api/events/event/eventController");
 
 // ---------------- GET ALL EVENTS ----------------
@@ -32,6 +33,9 @@ router.patch("/:id/react", auth, reactToEvent);
 
 // ---------------- COMMENT ON EVENT ----------------
 router.post("/:id/comment", auth, commentOnEvent);
+
+// ---------------- PIN COMMENT ON EVENT ----------------
+router.put("/:id/comment/:commentId/pin", auth, pinCommentOnEvent);
 
 // ---------------- EDIT COMMENT ON EVENT ----------------
 router.put("/:id/comment/:commentId", auth, editCommentOnEvent);

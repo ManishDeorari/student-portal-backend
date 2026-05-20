@@ -15,4 +15,5 @@ module.exports = {
   reactToReply: require("./comment/reactToReply"),
   editReply: require("./comment/editReply"),
   deleteReply: require("./comment/deleteReply"),
+  pinComment: require("./comment/pinComment"),
 };

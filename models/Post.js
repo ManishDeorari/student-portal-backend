@@ -26,6 +26,7 @@ const commentSchema = new mongoose.Schema({
     default: () => new Map(),
   },
   replies: [replySchema],
+  isPinned: { type: Boolean, default: false },
 });
 
 const postSchema = new mongoose.Schema({

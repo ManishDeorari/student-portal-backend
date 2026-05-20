@@ -17,6 +17,7 @@ const {
   editReply,
   deleteReply,
   reactToReply,
+  pinComment,
 } = require("../src/api/posts/postController");
 
 const Post = require("../models/Post"); // Required for GET /posts/:id
@@ -45,6 +46,9 @@ router.put("/:postId/comment/:commentId", auth, editComment);
 
 // ---------------- DELETE COMMENT ----------------
 router.delete("/:postId/comment/:commentId", auth, deleteComment);
+
+// ---------------- PIN COMMENT ----------------
+router.put("/:postId/comment/:commentId/pin", auth, pinComment);
 
 router.put("/:postId/comment/:commentId/reply/:replyId", auth, editReply);
 router.delete("/:postId/comment/:commentId/reply/:replyId", auth, deleteReply);
