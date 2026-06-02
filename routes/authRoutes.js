@@ -1,9 +1,11 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 const User = require("../models/User");
 
 const router = express.Router();
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 // ======================== SIGNUP ==========================
 router.post("/signup", async (req, res) => {
@@ -32,6 +34,10 @@ router.post("/signup", async (req, res) => {
     // Faculty must have employee ID
     if (role === "faculty" && !employeeId) {
       return res.status(400).json({ message: "Employee ID is required for faculty" });
+    }
+
+    if (!passwordRegex.test(password)) {
+      return res.status(400).json({ message: "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character" });
     }
 
     // Hash password
@@ -131,10 +137,24 @@ router.post("/login", async (req, res) => {
       return res.status(403).json({ message: "Your account has not been approved by admin yet." });
     }
 
+    // Handle Session Limits
+    const sessionId = crypto.randomBytes(16).toString("hex");
+    if (!user.sessionIds) user.sessionIds = [];
+    
+    if (user.isMainAdmin) {
+      user.sessionIds.push(sessionId);
+      if (user.sessionIds.length > 3) {
+        user.sessionIds.shift(); // Keep only last 3
+      }
+    } else {
+      user.sessionIds = [sessionId]; // Restrict to 1 active session
+    }
+    await user.save();
+
     const token = jwt.sign(
-      { id: user._id, role: user.role, isAdmin: user.isAdmin },
+      { id: user._id, role: user.role, isAdmin: user.isAdmin, sessionId },
       process.env.JWT_SECRET || "your_jwt_secret",
-      { expiresIn: "7d" }
+      { expiresIn: "2h" }
     );
 
     res.json({
@@ -173,6 +193,10 @@ router.post("/reset-password", authMiddleware, async (req, res) => {
     // Verify old password
     const isMatch = await bcrypt.compare(oldPassword, user.password);
     if (!isMatch) return res.status(400).json({ message: "Invalid current password" });
+
+    if (!passwordRegex.test(newPassword)) {
+      return res.status(400).json({ message: "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character" });
+    }
 
     // Hash new password
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
@@ -241,6 +265,10 @@ router.post("/reset-password-with-otp", async (req, res) => {
 
     if (!user) {
       return res.status(400).json({ message: "Invalid or expired OTP" });
+    }
+
+    if (!passwordRegex.test(newPassword)) {
+      return res.status(400).json({ message: "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character" });
     }
 
     // Hash new password

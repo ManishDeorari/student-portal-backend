@@ -178,6 +178,9 @@ const UserSchema = new mongoose.Schema(
     lastSeenNetworkAt: { type: Date, default: Date.now, index: true },
     lastSeenAdminRequestsAt: { type: Date, default: Date.now, index: true },
 
+    // Session Management (to limit active logins)
+    sessionIds: [{ type: String }],
+
     // Reset Password OTP
     resetPasswordOTP: { type: String },
     resetPasswordExpires: { type: Date },

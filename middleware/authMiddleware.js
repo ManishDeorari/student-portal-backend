@@ -30,6 +30,11 @@ module.exports = async function (req, res, next) {
 
     if (!user) return res.status(401).json({ message: "User not found" });
 
+    // Enforce Session Limit: Check if the token's sessionId is still valid
+    if (decoded.sessionId && user.sessionIds && !user.sessionIds.includes(decoded.sessionId)) {
+      return res.status(401).json({ message: "Session expired or logged in from another device" });
+    }
+
     // Attach user to request
     req.user = user;
 
