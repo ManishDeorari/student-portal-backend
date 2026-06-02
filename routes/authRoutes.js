@@ -21,6 +21,11 @@ router.post("/signup", async (req, res) => {
       return res.status(400).json({ message: "Invalid role — must be 'student' or 'faculty'" });
     }
 
+    // Require @gehu.ac.in email
+    if (!email.endsWith("@gehu.ac.in")) {
+      return res.status(400).json({ message: "Only @gehu.ac.in email addresses are allowed for sign up." });
+    }
+
     // Check for unique email
     const existingUser = await User.findOne({ email });
     if (existingUser)

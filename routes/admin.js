@@ -446,8 +446,12 @@ const performDeepDelete = async (userId) => {
     await Event.deleteMany({ createdBy: user._id });
     await Notification.deleteMany({ $or: [{ sender: user._id }, { receiver: user._id }] });
 
-    // Send deletion email confirming scrubbing completion
-    sendDeletionEmail(user).catch(err => console.error("Failed to send deletion email:", err.message));
+    // Send email confirming scrubbing completion or rejection
+    if (user.approved) {
+      sendDeletionEmail(user).catch(err => console.error("Failed to send deletion email:", err.message));
+    } else {
+      sendRejectionEmail(user).catch(err => console.error("Failed to send rejection email:", err.message));
+    }
 
     // === 7. FINAL USER DOCUMENT DELETION ===
     await user.deleteOne();
