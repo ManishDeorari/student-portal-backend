@@ -17,6 +17,7 @@ const transporter = nodemailer.createTransport({
     tls: {
         rejectUnauthorized: false // Helps in some restricted environments
     },
+    family: 4, // Force IPv4 to fix Render ENETUNREACH IPv6 errors
     connectionTimeout: 20000,
     greetingTimeout: 20000,
     socketTimeout: 20000,
