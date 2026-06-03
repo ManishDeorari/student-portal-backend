@@ -6,6 +6,8 @@ const User = require("../models/User");
 
 const router = express.Router();
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+// Enrollment number must follow format: PV-H followed by digits only (e.g. PV-H209001)
+const enrollmentNumberRegex = /^PV-H\d+$/;
 
 // ======================== SIGNUP ==========================
 router.post("/signup", async (req, res) => {
@@ -36,9 +38,40 @@ router.post("/signup", async (req, res) => {
       return res.status(400).json({ message: "Enrollment number is required for student" });
     }
 
+    // Validate enrollment number format (must be PV-H followed by digits, e.g. PV-H209001)
+    if (role === "student" && enrollmentNumber) {
+      if (!enrollmentNumberRegex.test(enrollmentNumber)) {
+        return res.status(400).json({
+          message: "Invalid enrollment number format. It must start with 'PV-H' followed by digits only (e.g. PV-H209001)."
+        });
+      }
+      if (enrollmentNumber.length > 15) {
+        return res.status(400).json({
+          message: "Enrollment number is too long. It must be in format PV-H followed by up to 10 digits (e.g. PV-H209001)."
+        });
+      }
+      // Check if enrollment number is already taken
+      const existingEnrollment = await User.findOne({ enrollmentNumber });
+      if (existingEnrollment) {
+        return res.status(409).json({
+          message: `Enrollment number '${enrollmentNumber}' is already registered. Please use a different enrollment number or login if you already have an account.`
+        });
+      }
+    }
+
     // Faculty must have employee ID
     if (role === "faculty" && !employeeId) {
       return res.status(400).json({ message: "Employee ID is required for faculty" });
+    }
+
+    // Check if employee ID is already taken
+    if (role === "faculty" && employeeId) {
+      const existingEmployee = await User.findOne({ employeeId });
+      if (existingEmployee) {
+        return res.status(409).json({
+          message: `Employee ID '${employeeId}' is already registered. Please use a different ID or login if you already have an account.`
+        });
+      }
     }
 
     if (!passwordRegex.test(password)) {
@@ -101,6 +134,18 @@ router.post("/signup", async (req, res) => {
     });
   } catch (err) {
     console.error("❌ Signup error:", err.message);
+    // Handle MongoDB duplicate key errors (safety net)
+    if (err.code === 11000) {
+      const field = Object.keys(err.keyPattern || {})[0];
+      if (field === "enrollmentNumber") {
+        return res.status(409).json({ message: "This enrollment number is already registered. Please check your enrollment number or login instead." });
+      } else if (field === "email") {
+        return res.status(409).json({ message: "This email address is already registered. Please use a different email or login instead." });
+      } else if (field === "employeeId") {
+        return res.status(409).json({ message: "This Employee ID is already registered. Please check your ID or login instead." });
+      }
+      return res.status(409).json({ message: "This account information is already registered. Please try logging in." });
+    }
     res.status(500).json({ message: "Server error during signup" });
   }
 });
