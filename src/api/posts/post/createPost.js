@@ -4,7 +4,7 @@ const PointsSystemConfig = require("../../../../models/PointsSystemConfig");
 
 const createPost = async (req, res) => {
   try {
-    const { content, images, video, type, sessionDetails, announcementDetails, pointsRequested, pointsStatus } = req.body;
+    const { content, images, video, documents, type, sessionDetails, announcementDetails, pointsRequested, pointsStatus } = req.body;
     const userRole = req.user.role;
     const isAdmin = req.user.isAdmin;
 
@@ -61,6 +61,7 @@ const createPost = async (req, res) => {
       content: hasContent ? content.trim() : "",
       images: hasImages ? images : [],
       video: hasVideo ? video : null,
+      documents: Array.isArray(documents) ? documents : [],
       type: finalType,
       sessionDetails: finalType === "Session" ? sessionDetails : undefined,
       announcementDetails: finalAnnouncementDetails,
