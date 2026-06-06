@@ -21,9 +21,12 @@ const groupMessageSchema = new mongoose.Schema({
     mediaPublicId: {
         type: String,
     },
+    fileName: {
+        type: String,
+    },
     type: {
         type: String,
-        enum: ["text", "image"],
+        enum: ["text", "image", "document"],
         default: "text",
     },
     reactions: [{

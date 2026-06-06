@@ -42,6 +42,14 @@ const postSchema = new mongoose.Schema({
     url: String,
     public_id: String,
   },
+  documents: [
+    {
+      url: String,
+      public_id: String,
+      original_filename: String,
+      format: String,
+    },
+  ],
   comments: [commentSchema],
   reactions: {
     type: Map,
