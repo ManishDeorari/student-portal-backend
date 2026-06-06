@@ -173,7 +173,7 @@ router.get("/:groupId/messages", checkAuth, async (req, res) => {
 // @desc    Send a message to a group (Text or Image)
 router.post("/send", checkAuth, async (req, res) => {
     try {
-        const { groupId, content, mediaUrl, mediaPublicId, type } = req.body;
+        const { groupId, content, mediaUrl, mediaPublicId, type, fileName } = req.body;
         const senderId = req.user.id;
         const userRole = req.user.role;
 
@@ -205,6 +205,7 @@ router.post("/send", checkAuth, async (req, res) => {
             content: content || "",
             mediaUrl,
             mediaPublicId,
+            fileName,
             type: type || "text"
         });
 
