@@ -429,7 +429,13 @@ router.delete("/:groupId/messages/:messageId", checkAuth, async (req, res) => {
 
         // If it has media, delete from Cloudinary
         if (message.mediaPublicId) {
-            await cloudinary.uploader.destroy(message.mediaPublicId);
+            const fallbackTypes = ["image", "video", "raw"];
+            for (const type of fallbackTypes) {
+                try {
+                    const result = await cloudinary.uploader.destroy(message.mediaPublicId, { resource_type: type });
+                    if (result.result === "ok") break;
+                } catch (err) {}
+            }
         }
 
         await GroupMessage.findByIdAndDelete(messageId);
@@ -567,11 +573,14 @@ router.delete("/:groupId", checkAuth, checkAdmin, async (req, res) => {
 
                 if (allPublicIds.length > 0) {
                     console.log(`🗑️ Deleting ${allPublicIds.length} assets from Cloudinary for group: ${groupName}`);
-                    await Promise.all(allPublicIds.map(id => 
-                        cloudinary.uploader.destroy(id).catch(err => 
-                            console.error(`❌ Failed to delete asset ${id}:`, err.message)
-                        )
-                    ));
+                    await Promise.all(allPublicIds.map(async (id) => {
+                        for (const type of ["image", "video", "raw"]) {
+                            try {
+                                const result = await cloudinary.uploader.destroy(id, { resource_type: type });
+                                if (result.result === "ok") break;
+                            } catch (err) {}
+                        }
+                    }));
                 }
             } catch (err) {
                 console.error("❌ Background asset cleanup error:", err);

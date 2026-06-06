@@ -59,6 +59,16 @@ const deletePost = async (req, res) => {
       }
     }
 
+    for (const doc of post.documents || []) {
+      if (doc.public_id) {
+        try {
+          await cloudinary.uploader.destroy(doc.public_id, { resource_type: "raw" });
+        } catch (err) {
+          console.error("❌ Document delete failed:", err.message);
+        }
+      }
+    }
+
     // Cleanup Notifications for this post
     try {
       const Notification = require("../../../../models/Notification");
