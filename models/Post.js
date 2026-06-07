@@ -66,7 +66,7 @@ const postSchema = new mongoose.Schema({
   announcementDetails: {
     isWinnerAnnouncement: { type: Boolean, default: false },
     eventName: String, // e.g. "Student Meet 2024"
-    originalEventId: { type: mongoose.Schema.Types.ObjectId, ref: "Post" },
+    originalEventId: { type: mongoose.Schema.Types.ObjectId, ref: "Event" },
     winners: [
       {
         name: String,
