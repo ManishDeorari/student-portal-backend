@@ -185,7 +185,7 @@ const approvePointsRequest = async (req, res) => {
       if (post.type === "EventRepost" && post.eventRepostDetails) {
         const Event = require("../../../models/Event");
         const event = await Event.findById(post.eventRepostDetails.originalEventId);
-        const pointsToAward = event ? (event.pointsAssigned || 0) : 0;
+        const pointsToAward = event ? (event.pointsAssigned || 10) : 10;
 
         const user = await User.findById(post.user);
         if (user && !user.eventPointsAwarded?.includes(post.eventRepostDetails.originalEventId)) {
