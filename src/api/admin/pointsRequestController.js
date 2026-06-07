@@ -11,7 +11,7 @@ const getPendingPointsRequests = async (req, res) => {
         { type: "EventRepost", "eventRepostDetails.pointsRequested": true, "eventRepostDetails.pointsStatus": "pending" }
       ]
     })
-    .populate("user", "name profilePicture")
+    .populate("user", "name profilePicture enrollmentNumber")
     .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId" })
     .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture" })
     .populate({ path: "eventRepostDetails.originalEventId", select: "title images" })

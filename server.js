@@ -188,7 +188,7 @@ app.use(helmet());
 const apiLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, 
   max: 150, 
-  message: "Too many requests from this IP, please try again after 10 minutes",
+  message: { message: "Too many requests from this IP, please try again after 10 minutes" },
   standardHeaders: true,
   legacyHeaders: false,
 });

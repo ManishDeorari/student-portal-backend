@@ -55,7 +55,7 @@ const getPosts = async (req, res) => {
     const { subtype, search } = req.query;
 
     if (type === "Regular") {
-      filter = { $or: [{ type: "Regular" }, { type: { $exists: false } }, { type: null }] };
+      filter = { $or: [{ type: "Regular" }, { type: "EventRepost" }, { type: { $exists: false } }, { type: null }] };
     } else {
       filter = { type };
     }
