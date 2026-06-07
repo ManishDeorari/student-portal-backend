@@ -17,4 +17,5 @@ module.exports = {
 
   getMyActivity: require("./profile/getMyActivity"),
   searchUsers: require("./getUsers/searchUsers"),
+  getUserEvents: require("./profile/getUserEvents"),
 };

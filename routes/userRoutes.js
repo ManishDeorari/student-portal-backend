@@ -14,6 +14,7 @@ const {
   getMyPosts,
   getMyActivity,
   searchUsers,
+  getUserEvents,
 } = require("../src/api/user/userController");
 
 // ------- PROFILE ROUTES -------
@@ -34,5 +35,6 @@ router.get("/award-eligible", auth, getAwardEligibleUsers);
 router.get("/search", auth, searchUsers);
 // ------- DYNAMIC ROUTES (MUST BE LAST) -------
 router.get("/:id", auth, getPublicProfile);
+router.get("/:id/events", auth, getUserEvents);
 
 module.exports = router;
