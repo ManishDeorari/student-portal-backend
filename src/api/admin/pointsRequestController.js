@@ -7,12 +7,14 @@ const getPendingPointsRequests = async (req, res) => {
     const posts = await Post.find({
       $or: [
         { pointsRequested: true, pointsStatus: "pending" },
-        { "announcementDetails.pointsRequested": true, "announcementDetails.pointsStatus": "pending" }
+        { "announcementDetails.pointsRequested": true, "announcementDetails.pointsStatus": "pending" },
+        { type: "EventRepost", "eventRepostDetails.pointsRequested": true, "eventRepostDetails.pointsStatus": "pending" }
       ]
     })
     .populate("user", "name profilePicture")
     .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId" })
     .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture" })
+    .populate({ path: "eventRepostDetails.originalEventId", select: "title images" })
     .sort({ createdAt: -1 });
 
     res.json(posts);
@@ -37,10 +39,14 @@ const approvePointsRequest = async (req, res) => {
       let message = "Your points request was declined by the Admin.";
       if (post.type === "Session") {
         message = "Your Student Session points request was declined by the Admin.";
-      } else if (post.announcementDetails) {
+      } else if (post.announcementDetails && post.type === "Announcement") {
         const eventName = post.announcementDetails.eventName || "an event";
         message = `Your points request for event "${eventName}" was declined by the Admin.`;
         post.announcementDetails.pointsStatus = "rejected";
+      } else if (post.type === "EventRepost" && post.eventRepostDetails) {
+        const eventName = post.eventRepostDetails.eventName || "an event";
+        message = `Your attendance points request for "${eventName}" was declined by the Admin.`;
+        post.eventRepostDetails.pointsStatus = "rejected";
       }
 
       // Create Rejection Notification
@@ -173,6 +179,58 @@ const approvePointsRequest = async (req, res) => {
         post.announcementDetails.pointsStatus = "approved";
         await post.save();
         return res.json({ message: "Announcement points approved and awarded", results: awardResults });
+      }
+
+      // Case 3: EventRepost (Points to Reposter)
+      if (post.type === "EventRepost" && post.eventRepostDetails) {
+        const Event = require("../../../models/Event");
+        const event = await Event.findById(post.eventRepostDetails.originalEventId);
+        const pointsToAward = event ? (event.pointsAssigned || 0) : 0;
+
+        const user = await User.findById(post.user);
+        if (user && !user.eventPointsAwarded?.includes(post.eventRepostDetails.originalEventId)) {
+          if (!user.points) user.points = { total: 0 };
+          user.points.total = (user.points.total || 0) + pointsToAward;
+          
+          if (user.role === "alumni") {
+            user.points.alumniParticipation = (user.points.alumniParticipation || 0) + pointsToAward;
+          } else {
+            user.points.studentParticipation = (user.points.studentParticipation || 0) + pointsToAward;
+          }
+
+          user.eventPointsAwarded.push(post.eventRepostDetails.originalEventId);
+          await user.save();
+
+          const eventName = post.eventRepostDetails.eventName || "the event";
+          const newNotification = new Notification({
+            sender: req.user._id,
+            receiver: user._id,
+            type: "points_earned",
+            message: `You earned ${pointsToAward} points for attending "${eventName}".`,
+            postId: post.eventRepostDetails.originalEventId || post._id
+          });
+          await newNotification.save();
+
+          if (req.io) {
+            const userRoom = user._id.toString();
+            req.io.to(userRoom).emit("newNotification", { ...newNotification.toObject(), sender: senderInfo });
+            req.io.to(userRoom).emit("pointsUpdated", {
+              totalPoints: user.points.total,
+              awardedPoints: pointsToAward,
+              category: user.role === "alumni" ? "alumniParticipation" : "studentParticipation",
+              reason: `Attended ${eventName}`
+            });
+          }
+          
+          post.eventRepostDetails.pointsStatus = "approved";
+          await post.save();
+          return res.json({ message: "Event Repost points approved and awarded" });
+        } else if (user && user.eventPointsAwarded?.includes(post.eventRepostDetails.originalEventId)) {
+          // Already awarded, just approve post
+          post.eventRepostDetails.pointsStatus = "approved";
+          await post.save();
+          return res.json({ message: "User already received points for this event. Repost approved." });
+        }
       }
     }
 

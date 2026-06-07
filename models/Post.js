@@ -58,7 +58,7 @@ const postSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ["Regular", "Session", "Event", "Announcement"],
+    enum: ["Regular", "Session", "Event", "Announcement", "EventRepost"],
     default: "Regular",
   },
   pointsRequested: { type: Boolean, default: false },
@@ -86,6 +86,16 @@ const postSchema = new mongoose.Schema({
   sessionDetails: {
     schoolOrCollege: { type: String },
     campus: { type: String },
+    date: { type: String },
+    time: { type: String },
+  },
+  eventRepostDetails: {
+    originalEventId: { type: mongoose.Schema.Types.ObjectId, ref: "Event" },
+    eventName: { type: String },
+    pointsRequested: { type: Boolean, default: false },
+    pointsStatus: { type: String, enum: ["pending", "approved", "rejected", "none"], default: "none" },
+    campus: { type: String },
+    place: { type: String },
     date: { type: String },
     time: { type: String },
   }

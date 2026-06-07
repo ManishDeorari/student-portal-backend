@@ -21,6 +21,8 @@ const createPost = async (req, res) => {
     if (type && type !== "Regular") {
       if (type === "Session" && userRole === "student") {
         finalType = "Session";
+      } else if (type === "EventRepost" && userRole === "student") {
+        finalType = "EventRepost";
       } else if (type === "Event" && (userRole === "faculty" || isAdmin)) {
         finalType = "Event";
       } else if (type === "Announcement" && (userRole === "faculty" || isAdmin)) {
@@ -56,6 +58,8 @@ const createPost = async (req, res) => {
       }
     }
 
+    const { eventRepostDetails } = req.body; // Extract eventRepostDetails if passed
+
     const post = new Post({
       user: req.user._id || req.user.id,
       content: hasContent ? content.trim() : "",
@@ -65,8 +69,9 @@ const createPost = async (req, res) => {
       type: finalType,
       sessionDetails: finalType === "Session" ? sessionDetails : undefined,
       announcementDetails: finalAnnouncementDetails,
-      pointsRequested: (finalType === "Session" && pointsRequested) || (finalType === "Announcement" && announcementDetails?.pointsRequested) || false,
-      pointsStatus: ((finalType === "Session" && pointsRequested) || (finalType === "Announcement" && announcementDetails?.pointsRequested)) ? "pending" : "none",
+      eventRepostDetails: finalType === "EventRepost" ? eventRepostDetails : undefined,
+      pointsRequested: (finalType === "Session" && pointsRequested) || (finalType === "Announcement" && announcementDetails?.pointsRequested) || (finalType === "EventRepost") || false,
+      pointsStatus: ((finalType === "Session" && pointsRequested) || (finalType === "Announcement" && announcementDetails?.pointsRequested) || finalType === "EventRepost") ? "pending" : "none",
     });
 
     await post.save();

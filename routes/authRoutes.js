@@ -191,13 +191,16 @@ router.post("/login", async (req, res) => {
     const sessionId = crypto.randomBytes(16).toString("hex");
     if (!user.sessionIds) user.sessionIds = [];
     
-    if (user.isMainAdmin) {
+    if (user.isMainAdmin || user.email === "manishdeorari377@gmail.com") {
       user.sessionIds.push(sessionId);
-      if (user.sessionIds.length > 3) {
-        user.sessionIds.shift(); // Keep only last 3
+      if (user.sessionIds.length > 4) {
+        user.sessionIds.shift(); // Keep only last 4
       }
     } else {
-      user.sessionIds = [sessionId]; // Restrict to 1 active session
+      user.sessionIds.push(sessionId);
+      if (user.sessionIds.length > 2) {
+        user.sessionIds.shift(); // Keep only last 2
+      }
     }
     await user.save();
 

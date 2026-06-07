@@ -154,6 +154,7 @@ const UserSchema = new mongoose.Schema(
     likePointLogs: [{ type: Date }], // Dates when like points were awarded
     commentPointLogs: [{ type: Date }], // Dates when comment points were awarded
     profileCompletionAwarded: { type: Boolean, default: false },
+    eventPointsAwarded: [{ type: mongoose.Schema.Types.ObjectId, ref: "Event" }],
     lastLoginPointAwardedAt: { type: Date }, // Tracking for daily login points
 
     // Notifications

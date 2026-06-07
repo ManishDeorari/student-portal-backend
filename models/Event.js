@@ -39,11 +39,26 @@ const EventSchema = new mongoose.Schema({
     url: String,
     public_id: String,
   },
+  documents: [
+    {
+      url: String,
+      public_id: String,
+      original_filename: String,
+      format: String,
+    },
+  ],
+  eventType: {
+    type: String,
+    enum: ["online_registration", "no_registration"],
+    default: "online_registration"
+  },
+  pointsAssigned: { type: Number, default: 0 },
+  tags: [{ type: String }],
   startDate: { type: Date, required: true },
   startTime: { type: String, required: true }, // HH:MM AM/PM
   timezone: { type: String, default: "IST" },
   endDate: { type: Date, required: true },
-  registrationCloseDate: { type: Date, required: true },
+  registrationCloseDate: { type: Date, required: function() { return this.eventType === 'online_registration'; } },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   registrationFields: {
     name: { type: Boolean, default: true },

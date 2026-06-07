@@ -7,6 +7,10 @@ const createEvent = async (req, res) => {
       description,
       images,
       video,
+      documents,
+      eventType,
+      pointsAssigned,
+      tags,
       startDate,
       startTime,
       timezone,
@@ -26,8 +30,12 @@ const createEvent = async (req, res) => {
       return res.status(403).json({ message: "Only administrators and faculty can create events." });
     }
 
-    if (!title || !description || !startDate || !startTime || !endDate || !registrationCloseDate) {
+    if (!title || !description || !startDate || !startTime || !endDate) {
       return res.status(400).json({ message: "Missing required event fields." });
+    }
+    
+    if (eventType !== "no_registration" && !registrationCloseDate) {
+      return res.status(400).json({ message: "Registration close date is required for online registration events." });
     }
 
     const event = new Event({
@@ -39,7 +47,11 @@ const createEvent = async (req, res) => {
       startTime,
       timezone: timezone || "IST",
       endDate,
-      registrationCloseDate,
+      registrationCloseDate: eventType === "no_registration" ? undefined : registrationCloseDate,
+      documents: documents || [],
+      eventType: eventType || "online_registration",
+      pointsAssigned: pointsAssigned ? Number(pointsAssigned) : 0,
+      tags: tags || [],
       createdBy: req.user._id || req.user.id,
       registrationFields: registrationFields || {
         name: true,

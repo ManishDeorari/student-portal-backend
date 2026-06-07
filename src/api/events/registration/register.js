@@ -1,5 +1,7 @@
 const Registration = require("../../../../models/Registration");
 const Event = require("../../../../models/Event");
+const User = require("../../../../models/User");
+const Notification = require("../../../../models/Notification");
 
 const registerEvent = async (req, res) => {
   try {
@@ -57,6 +59,54 @@ const registerEvent = async (req, res) => {
     });
 
     await registration.save();
+
+    // Give points if applicable
+    if (event.eventType === "online_registration" && event.pointsAssigned > 0) {
+      const awardPointsToUser = async (uId) => {
+        const userToUpdate = await User.findById(uId);
+        if (userToUpdate && !userToUpdate.eventPointsAwarded?.includes(event._id)) {
+          if (!userToUpdate.points) userToUpdate.points = { total: 0 };
+          userToUpdate.points.total = (userToUpdate.points.total || 0) + event.pointsAssigned;
+          
+          // alumni portal has alumniParticipation, student portal has studentParticipation
+          if (userToUpdate.role === "alumni") {
+             userToUpdate.points.alumniParticipation = (userToUpdate.points.alumniParticipation || 0) + event.pointsAssigned;
+          } else {
+             userToUpdate.points.studentParticipation = (userToUpdate.points.studentParticipation || 0) + event.pointsAssigned;
+          }
+          
+          userToUpdate.eventPointsAwarded.push(event._id);
+          await userToUpdate.save();
+
+          const newNotification = new Notification({
+            sender: req.user._id || req.user.id,
+            receiver: userToUpdate._id,
+            type: "points_earned",
+            message: `You earned ${event.pointsAssigned} points for registering for "${event.title}".`,
+            postId: event._id
+          });
+          await newNotification.save();
+
+          if (req.io) {
+            req.io.to(userToUpdate._id.toString()).emit("pointsUpdated", {
+              totalPoints: userToUpdate.points.total,
+              awardedPoints: event.pointsAssigned,
+              category: userToUpdate.role === "alumni" ? "alumniParticipation" : "studentParticipation",
+              reason: `Registered for ${event.title}`
+            });
+            req.io.to(userToUpdate._id.toString()).emit("newNotification", newNotification);
+          }
+        }
+      };
+
+      if (isGroup && groupMembers && groupMembers.length > 0) {
+        for (const memberId of groupMembers) {
+          await awardPointsToUser(memberId);
+        }
+      } else {
+        await awardPointsToUser(userId);
+      }
+    }
 
     // Calculate realistic headcount accurately including group subsets
     const allRegs = await Registration.find({ eventId });

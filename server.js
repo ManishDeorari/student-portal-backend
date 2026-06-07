@@ -4,6 +4,10 @@ const connectDB = require("./config/db");
 const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+const mongoSanitize = require("express-mongo-sanitize");
+const xssClean = require("xss-clean");
 
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
@@ -176,8 +180,28 @@ io.on("connection", (socket) => {
 
 // ✅ Middleware
 console.log("🟢 Middleware setup...");
+
+// Security Headers
+app.use(helmet());
+
+// Rate Limiting (150 requests per 10 mins)
+const apiLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, 
+  max: 150, 
+  message: "Too many requests from this IP, please try again after 10 minutes",
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use("/api", apiLimiter);
+
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb", parameterLimit: 50000 }));
+
+// Data Sanitization against NoSQL query injection
+app.use(mongoSanitize());
+
+// Data Sanitization against XSS
+app.use(xssClean());
 
 
 
@@ -210,8 +234,22 @@ app.use("/api/points-requests", pointsRequestRoutes);
 
 // ✅ Global Error Handler
 app.use((err, req, res, next) => {
-  console.error(err.message);
+  console.error("❌ Global Express Error:", err);
   res.status(500).json({ message: "Server Error" });
+});
+
+// ✅ Catch Unhandled Promise Rejections
+process.on("unhandledRejection", (err) => {
+  console.error("❌ UNHANDLED REJECTION! 💥 Shutting down gracefully...");
+  console.error(err.name, err.message, err.stack);
+  // Ideally, close server and exit process. For now, log and prevent crash:
+});
+
+// ✅ Catch Uncaught Exceptions
+process.on("uncaughtException", (err) => {
+  console.error("❌ UNCAUGHT EXCEPTION! 💥 Shutting down gracefully...");
+  console.error(err.name, err.message, err.stack);
+  // Ideally, close server and exit process.
 });
 
 // ✅ Server is now started inside connectDB().then() above
