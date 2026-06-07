@@ -38,6 +38,7 @@ const createPost = async (req, res) => {
       finalAnnouncementDetails = {
         isWinnerAnnouncement: announcementDetails.isWinnerAnnouncement || false,
         eventName: announcementDetails.eventName || "",
+        originalEventId: announcementDetails.originalEventId || undefined,
         winners: announcementDetails.winners || [],
       };
 

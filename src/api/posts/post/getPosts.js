@@ -20,7 +20,8 @@ const getPosts = async (req, res) => {
         .populate({ path: "comments.replies.user", select: "name profilePicture" })
         .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId" })
         .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture" })
-        .populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId" } });
+        .populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId" } })
+        .populate({ path: "announcementDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId" } });
         
       let eventFilter = userId ? { createdBy: userId } : {};
       const events = await Event.find(eventFilter)
@@ -84,7 +85,8 @@ const getPosts = async (req, res) => {
       .populate({ path: "comments.replies.user", select: "name profilePicture" })
       .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId" })
       .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture" })
-      .populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId" } });
+      .populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId" } })
+      .populate({ path: "announcementDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId" } });
 
     const total = await Post.countDocuments(filter);
 
