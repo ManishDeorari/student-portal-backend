@@ -14,7 +14,7 @@ const getPendingPointsRequests = async (req, res) => {
     .populate("user", "name profilePicture enrollmentNumber")
     .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId" })
     .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture" })
-    .populate({ path: "eventRepostDetails.originalEventId", select: "title images" })
+    .populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId" } })
     .sort({ createdAt: -1 });
 
     res.json(posts);
