@@ -15,19 +15,19 @@ const getPosts = async (req, res) => {
       if (userId) filter.user = userId;
       
       const posts = await Post.find(filter)
-        .populate("user", "name profilePicture")
-        .populate({ path: "comments.user", select: "name profilePicture" })
-        .populate({ path: "comments.replies.user", select: "name profilePicture" })
+        .populate("user", "name profilePicture points.total")
+        .populate({ path: "comments.user", select: "name profilePicture points.total" })
+        .populate({ path: "comments.replies.user", select: "name profilePicture points.total" })
         .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId" })
         .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture" })
-        .populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId" } })
-        .populate({ path: "announcementDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId" } });
+        .populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId points.total" } })
+        .populate({ path: "announcementDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId points.total" } });
         
       let eventFilter = userId ? { createdBy: userId } : {};
       const events = await Event.find(eventFilter)
-        .populate("createdBy", "name profilePicture")
-        .populate({ path: "comments.user", select: "name profilePicture" })
-        .populate({ path: "comments.replies.user", select: "name profilePicture" });
+        .populate("createdBy", "name profilePicture points.total")
+        .populate({ path: "comments.user", select: "name profilePicture points.total" })
+        .populate({ path: "comments.replies.user", select: "name profilePicture points.total" });
         
       const mappedEvents = await Promise.all(events.map(async (e) => {
         const regCount = await Registration.countDocuments({ eventId: e._id });
@@ -80,13 +80,13 @@ const getPosts = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate("user", "name profilePicture")
-      .populate({ path: "comments.user", select: "name profilePicture" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture" })
+      .populate("user", "name profilePicture points.total")
+      .populate({ path: "comments.user", select: "name profilePicture points.total" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture points.total" })
       .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId" })
       .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture" })
-      .populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId" } })
-      .populate({ path: "announcementDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId" } });
+      .populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId points.total" } })
+      .populate({ path: "announcementDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId points.total" } });
 
     const total = await Post.countDocuments(filter);
 

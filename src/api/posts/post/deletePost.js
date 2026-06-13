@@ -80,6 +80,35 @@ const deletePost = async (req, res) => {
     await Post.findByIdAndDelete(req.params.id);
     req.io.emit("postDeleted", { postId: req.params.id });
 
+    // ✅ Revoke Points
+    try {
+      const PointsSystemConfig = require("../../../../models/PointsSystemConfig");
+      const config = (await PointsSystemConfig.findOne()) || { postPoints: 10 };
+      
+      const postAuthor = await User.findById(post.user);
+      if (postAuthor && postAuthor.points) {
+        // Subtract points safely
+        postAuthor.points.total = Math.max(0, (postAuthor.points.total || 0) - (config.postPoints || 10));
+        
+        if (postAuthor.points.posts !== undefined) {
+          postAuthor.points.posts = Math.max(0, postAuthor.points.posts - (config.postPoints || 10));
+        }
+        if (postAuthor.points.contentContribution !== undefined) {
+          postAuthor.points.contentContribution = Math.max(0, postAuthor.points.contentContribution - (config.postPoints || 10));
+        }
+
+        // Pop last log entry if possible, though not strictly necessary since the point total is what matters
+        if (postAuthor.postPointLogs && postAuthor.postPointLogs.length > 0) {
+          postAuthor.postPointLogs.pop();
+        }
+
+        await postAuthor.save();
+        console.log(`✅ Revoked ${config.postPoints} points from user ${postAuthor.name} for post deletion.`);
+      }
+    } catch (revokeErr) {
+      console.error("❌ Failed to revoke points:", revokeErr.message);
+    }
+
     res.json({ message: "Post deleted successfully" });
   } catch (err) {
     console.error("❌ Delete post error:", err);

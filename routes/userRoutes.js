@@ -15,6 +15,7 @@ const {
   getMyActivity,
   searchUsers,
   getUserEvents,
+  getTopEarners,
 } = require("../src/api/user/userController");
 
 // ------- PROFILE ROUTES -------
@@ -23,6 +24,7 @@ router.put("/update", auth, updateMyProfile);
 router.get("/myposts", auth, getMyPosts);
 // ------- CONNECTION ROUTES -------
 router.get("/all", auth, getAllUsers);
+router.get("/top-earners", auth, getTopEarners);
 router.get("/connected", auth, getConnectedUsers);
 router.post("/request/:id", auth, sendConnectionRequest);
 router.post("/accept/:id", auth, acceptConnectionRequest);

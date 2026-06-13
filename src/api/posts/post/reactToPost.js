@@ -107,6 +107,30 @@ module.exports = async (req, res) => {
       } catch (awardErr) {
         console.error("❌ Failed to award points for reaction:", awardErr.message);
       }
+    } else if (isSameEmoji && req.user.role === "student") {
+      // ✅ Revoke Points Logic (Reaction Removed)
+      try {
+        const User = require("../../../../models/User");
+        const PointsSystemConfig = require("../../../../models/PointsSystemConfig");
+        const user = await User.findById(userId);
+        const config = (await PointsSystemConfig.findOne()) || { likePoints: 2 };
+        const pts = config.likePoints || 2;
+
+        if (user && user.points) {
+          user.points.total = Math.max(0, (user.points.total || 0) - pts);
+          user.points.likes = Math.max(0, (user.points.likes || 0) - pts);
+          user.points.studentEngagement = Math.max(0, (user.points.studentEngagement || 0) - pts);
+
+          if (user.likePointLogs && user.likePointLogs.length > 0) {
+            user.likePointLogs.pop();
+          }
+
+          await user.save();
+          console.log(`✅ Revoked ${pts} points from user ${user.name} for removing reaction.`);
+        }
+      } catch (revokeErr) {
+        console.error("❌ Failed to revoke points for reaction removal:", revokeErr.message);
+      }
     }
 
     // Trigger Notification for the post owner (Only if it's NOT a toggle off AND not the owner)

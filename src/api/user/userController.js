@@ -5,6 +5,7 @@ module.exports = {
   updateBanner: require("./profile/updateBanner"),
   getPublicProfile: require("./profile/getPublicProfile"),
   getAllUsers: require("./getUsers/getAllUsers"),
+  getTopEarners: require("./getUsers/getTopEarners"),
 
   getConnectedUsers: require("./connections/getConnectedUsers"),
   sendConnectionRequest: require("./connections/sendConnectionRequest"),
