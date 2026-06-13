@@ -15,11 +15,14 @@ const getRegistrations = async (req, res) => {
 
     const totalCount = registrations.length;
     
-    // Add stable group tracking labels
-    const processedRegistrations = registrations.map((reg, idx) => ({
-      ...reg.toObject({ flattenMaps: true }),
-      groupName: `Group ${idx + 1}`
-    }));
+    // Add stable group tracking labels if missing
+    const processedRegistrations = registrations.map((reg, idx) => {
+      const obj = reg.toObject({ flattenMaps: true });
+      if (obj.isGroup) {
+         obj.groupName = obj.groupName || `Group ${idx + 1}`;
+      }
+      return obj;
+    });
 
     res.json({ totalCount, registrations: processedRegistrations });
   } catch (error) {
