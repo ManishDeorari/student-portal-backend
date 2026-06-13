@@ -20,8 +20,13 @@ const downloadCSV = async (req, res) => {
       return res.status(404).json({ message: "No registrations found" });
     }
 
+    const capitalizeHeader = (str) => {
+      if (!str) return "";
+      return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    };
+
     const baseFields = Object.keys(event.registrationFields || {}).filter(field => event.registrationFields[field] === true);
-    const baseHeaders = baseFields.map(field => field.replace(/([A-Z])/g, ' $1').trim());
+    const baseHeaders = baseFields.map(field => capitalizeHeader(field.replace(/([A-Z])/g, ' $1').trim()));
     
     // Core headers
     let headers = ["Group Name", ...baseHeaders];
@@ -34,7 +39,7 @@ const downloadCSV = async (req, res) => {
     headers.push("Registration Date");
     
     // Add custom questions to headers
-    event.customQuestions.forEach(q => headers.push(q.question));
+    event.customQuestions.forEach(q => headers.push(capitalizeHeader(q.question)));
 
     let csvContent = headers.map(h => `"${h}"`).join(",") + "\n";
     let groupIndex = 1;
