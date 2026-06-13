@@ -5,7 +5,7 @@ const Notification = require("../../../../models/Notification");
 
 const registerEvent = async (req, res) => {
   try {
-    const { eventId, isGroup, groupMembers, answers } = req.body;
+    const { eventId, isGroup, groupName, groupMembers, answers } = req.body;
     const userId = req.user._id || req.user.id;
 
     const event = await Event.findById(eventId);
@@ -26,6 +26,7 @@ const registerEvent = async (req, res) => {
       }
 
       existingRegistration.isGroup = !!isGroup;
+      existingRegistration.groupName = isGroup ? (groupName || "") : "";
       existingRegistration.groupMembers = isGroup ? groupMembers : [];
       existingRegistration.answers = answers || {};
       await existingRegistration.save();
@@ -54,6 +55,7 @@ const registerEvent = async (req, res) => {
       userId,
       eventId,
       isGroup: !!isGroup,
+      groupName: isGroup ? (groupName || "") : "",
       groupMembers: isGroup ? groupMembers : [],
       answers: answers || {},
     });

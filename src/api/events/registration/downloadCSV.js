@@ -41,7 +41,14 @@ const downloadCSV = async (req, res) => {
 
     registrations.forEach(reg => {
       const user = reg.userId || {};
-      const groupLabel = `Group ${groupIndex++}`;
+      let groupLabel = "Individual";
+      if (reg.isGroup) {
+         if (reg.groupName) {
+             groupLabel = reg.groupName;
+         } else {
+             groupLabel = `Group ${groupIndex++}`;
+         }
+      }
       const row = [];
 
       // Prepend Group Name

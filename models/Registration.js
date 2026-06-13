@@ -4,6 +4,7 @@ const RegistrationSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   eventId: { type: mongoose.Schema.Types.ObjectId, ref: "Event", required: true },
   isGroup: { type: Boolean, default: false },
+  groupName: { type: String, default: "" },
   groupMembers: { type: [mongoose.Schema.Types.Mixed], default: [] },
   answers: {
     type: Map,
