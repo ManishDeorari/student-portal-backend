@@ -173,6 +173,10 @@ io.on("connection", (socket) => {
     console.log(`👥 [Socket] User left group room group_${groupId} (socket: ${socket.id})`);
   });
 
+  socket.on("typing", (data) => {
+    socket.broadcast.emit("typing", data);
+  });
+
   socket.on("disconnect", (reason) => {
     console.log(`❌ [Socket] Disconnected: ${socket.id} (Reason: ${reason})`);
   });
@@ -253,6 +257,7 @@ app.use("/api/counts", countRoutes);
 app.use("/api/events", require("./routes/eventRoutes"));
 app.use("/api/registrations", require("./routes/registrationRoutes"));
 app.use("/api/points-requests", pointsRequestRoutes);
+app.use("/api/search", require("./routes/searchRoutes")); // ✅ Global Search Route
 
 // ✅ Global Error Handler
 app.use((err, req, res, next) => {

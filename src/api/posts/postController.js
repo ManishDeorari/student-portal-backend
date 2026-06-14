@@ -16,4 +16,7 @@ module.exports = {
   editReply: require("./comment/editReply"),
   deleteReply: require("./comment/deleteReply"),
   pinComment: require("./comment/pinComment"),
+  pinPost: require("./post/pinPost"),
+  incrementViews: require("./post/incrementViews"),
+  tipPost: require("./post/tipPost"),
 };

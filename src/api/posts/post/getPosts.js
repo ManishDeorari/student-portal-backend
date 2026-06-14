@@ -11,8 +11,10 @@ const getPosts = async (req, res) => {
     
     // === "ALL" FETCHING LOGIC ===
     if (type === "all" || type === "All") {
-      let filter = {};
+      const now = new Date();
       if (userId) filter.user = userId;
+      filter.$and = [{ $or: [{ publishAt: { $lte: now } }, { publishAt: { $exists: false } }, { publishAt: null }] }];
+
       
       const posts = await Post.find(filter)
         .populate("user", "name profilePicture points.total")
@@ -45,7 +47,26 @@ const getPosts = async (req, res) => {
         return { ...ev, content: ev.description, user: ev.createdBy, type: "Event", registrationCount: regCount, isRegistered, myRegistration };
       }));
       
-      const allContent = [...posts, ...mappedEvents].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const sortType = req.query.sort || "newest";
+
+      const allContent = [...posts, ...mappedEvents].sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        
+        if (sortType === "trending") {
+          const getScore = (post) => {
+             const likes = post.reactions && post.reactions["👍"] ? post.reactions["👍"].length : 0;
+             const comments = post.comments ? post.comments.length : 0;
+             const views = post.viewedBy ? post.viewedBy.length : 0;
+             return (likes * 2) + (comments * 3) + (views * 1);
+          };
+          const scoreA = getScore(a);
+          const scoreB = getScore(b);
+          if (scoreB !== scoreA) return scoreB - scoreA;
+        }
+
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
       const startIndex = (page - 1) * limit;
       const paginatedContent = allContent.slice(startIndex, startIndex + limit);
       
@@ -56,10 +77,16 @@ const getPosts = async (req, res) => {
     let filter = {};
     const { subtype, search } = req.query;
 
+    const now = new Date();
+    const publishFilter = { $or: [{ publishAt: { $lte: now } }, { publishAt: { $exists: false } }, { publishAt: null }] };
+
     if (type === "Regular") {
-      filter = { $or: [{ type: "Regular" }, { type: "EventRepost" }, { type: { $exists: false } }, { type: null }] };
+      filter = { $and: [
+        { $or: [{ type: "Regular" }, { type: "EventRepost" }, { type: { $exists: false } }, { type: null }] },
+        publishFilter
+      ]};
     } else {
-      filter = { type };
+      filter = { $and: [{ type }, publishFilter] };
     }
 
     if (type === "Announcement") {
@@ -77,9 +104,6 @@ const getPosts = async (req, res) => {
     if (userId) filter.user = userId;
 
     const posts = await Post.find(filter)
-      .sort({ createdAt: -1 })
-      .skip((page - 1) * limit)
-      .limit(limit)
       .populate("user", "name profilePicture points.total")
       .populate({ path: "comments.user", select: "name profilePicture points.total" })
       .populate({ path: "comments.replies.user", select: "name profilePicture points.total" })
@@ -88,9 +112,34 @@ const getPosts = async (req, res) => {
       .populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId points.total" } })
       .populate({ path: "announcementDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId points.total" } });
 
+    let sortedPosts = posts;
+    if (req.query.sort === "trending") {
+      sortedPosts = posts.sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        const getScore = (p) => {
+           const likes = p.reactions && p.reactions["👍"] ? p.reactions["👍"].length : 0;
+           const comments = p.comments ? p.comments.length : 0;
+           const views = p.viewedBy ? p.viewedBy.length : 0;
+           return (likes * 2) + (comments * 3) + (views * 1);
+        };
+        const scoreA = getScore(a);
+        const scoreB = getScore(b);
+        if (scoreB !== scoreA) return scoreB - scoreA;
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+    } else {
+      sortedPosts = posts.sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1;
+        if (!a.isPinned && b.isPinned) return 1;
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+    }
+
+    const paginatedPosts = sortedPosts.slice((page - 1) * limit, page * limit);
     const total = await Post.countDocuments(filter);
 
-    res.json({ posts, total });
+    res.json({ posts: paginatedPosts, total });
   } catch (err) {
     console.error("❌ Fetch posts failed:", err);
     res.status(500).json({ message: "Failed to fetch posts" });

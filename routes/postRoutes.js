@@ -18,6 +18,9 @@ const {
   deleteReply,
   reactToReply,
   pinComment,
+  pinPost,
+  incrementViews,
+  tipPost,
 } = require("../src/api/posts/postController");
 
 const Post = require("../models/Post"); // Required for GET /posts/:id
@@ -31,6 +34,15 @@ router.post("/", auth, createPost);
 
 // ---------------- REACT TO POST ----------------
 router.patch("/:id/react", auth, reactToPost);
+
+// ---------------- INCREMENT VIEWS ----------------
+router.post("/:id/view", auth, incrementViews);
+
+// ---------------- PIN/UNPIN POST ----------------
+router.put("/:id/pin", auth, pinPost);
+
+// ---------------- TIP POST ----------------
+router.post("/:id/tip", auth, tipPost);
 
 // ---------------- COMMENT ON POST ----------------
 router.post("/:id/comment", auth, commentPost);

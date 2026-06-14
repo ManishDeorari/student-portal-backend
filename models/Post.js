@@ -61,6 +61,9 @@ const postSchema = new mongoose.Schema({
     enum: ["Regular", "Session", "Event", "Announcement", "EventRepost"],
     default: "Regular",
   },
+  isPinned: { type: Boolean, default: false },
+  viewedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  publishAt: { type: Date, default: Date.now },
   pointsRequested: { type: Boolean, default: false },
   pointsStatus: { type: String, enum: ["pending", "approved", "rejected", "none"], default: "none" },
   announcementDetails: {
