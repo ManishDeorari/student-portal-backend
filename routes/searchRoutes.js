@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const auth = require("../../middleware/authMiddleware");
+const auth = require("../middleware/authMiddleware");
 
-const User = require("../../models/User");
-const Post = require("../../models/Post");
-const Event = require("../../models/Event");
+const User = require("../models/User");
+const Post = require("../models/Post");
+const Event = require("../models/Event");
 
 router.get("/", auth, async (req, res) => {
   try {

@@ -40,7 +40,7 @@ const tipPost = async (req, res) => {
 
     // Add points to receiver
     if (!receiver.points) receiver.points = { total: 0 };
-    receiver.points.total += amount;
+    receiver.points.total = (receiver.points.total || 0) + amount;
     
     // Add to specific category if we have one for tips, else just total
     // receiver.points.contentContribution = (receiver.points.contentContribution || 0) + amount;

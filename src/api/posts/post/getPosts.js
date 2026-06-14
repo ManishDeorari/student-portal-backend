@@ -55,7 +55,9 @@ const getPosts = async (req, res) => {
         
         if (sortType === "trending") {
           const getScore = (post) => {
-             const likes = post.reactions && post.reactions["👍"] ? post.reactions["👍"].length : 0;
+             const getReactions = (r, emoji) => r ? (r.get ? r.get(emoji) : r[emoji]) : null;
+             const likesArr = getReactions(post.reactions, "👍");
+             const likes = likesArr ? likesArr.length : 0;
              const comments = post.comments ? post.comments.length : 0;
              const views = post.viewedBy ? post.viewedBy.length : 0;
              return (likes * 2) + (comments * 3) + (views * 1);
@@ -118,7 +120,9 @@ const getPosts = async (req, res) => {
         if (a.isPinned && !b.isPinned) return -1;
         if (!a.isPinned && b.isPinned) return 1;
         const getScore = (p) => {
-           const likes = p.reactions && p.reactions["👍"] ? p.reactions["👍"].length : 0;
+           const getReactions = (r, emoji) => r ? (r.get ? r.get(emoji) : r[emoji]) : null;
+           const likesArr = getReactions(p.reactions, "👍");
+           const likes = likesArr ? likesArr.length : 0;
            const comments = p.comments ? p.comments.length : 0;
            const views = p.viewedBy ? p.viewedBy.length : 0;
            return (likes * 2) + (comments * 3) + (views * 1);
