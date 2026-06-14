@@ -9,6 +9,7 @@ const getPosts = async (req, res) => {
     const type = req.query.type || "Regular";
     const userId = req.query.userId;
     
+    let filter = {};
     // === "ALL" FETCHING LOGIC ===
     if (type === "all" || type === "All") {
       const now = new Date();
@@ -76,7 +77,6 @@ const getPosts = async (req, res) => {
     }
 
     // === STANDARD FETCHING LOGIC ===
-    let filter = {};
     const { subtype, search } = req.query;
 
     const now = new Date();
