@@ -16,6 +16,11 @@ const pinPost = async (req, res) => {
     post.isPinned = !post.isPinned; // Toggle
     await post.save();
 
+    const io = req.app.get("io");
+    if (io) {
+      io.emit("postUpdated", { _id: post._id, isPinned: post.isPinned });
+    }
+
     res.json({ message: post.isPinned ? "Post pinned" : "Post unpinned", isPinned: post.isPinned });
   } catch (error) {
     console.error("Error pinning post:", error);

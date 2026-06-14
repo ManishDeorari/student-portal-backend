@@ -13,6 +13,11 @@ const incrementViews = async (req, res) => {
     if (!post.viewedBy.includes(userId)) {
       post.viewedBy.push(userId);
       await post.save();
+
+      const io = req.app.get("io");
+      if (io) {
+        io.emit("postUpdated", { _id: post._id, viewedBy: post.viewedBy });
+      }
     }
 
     res.json({ message: "View recorded", views: post.viewedBy.length });
