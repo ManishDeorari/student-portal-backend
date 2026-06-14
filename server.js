@@ -258,6 +258,7 @@ app.use("/api/events", require("./routes/eventRoutes"));
 app.use("/api/registrations", require("./routes/registrationRoutes"));
 app.use("/api/points-requests", pointsRequestRoutes);
 app.use("/api/search", require("./routes/searchRoutes")); // ✅ Global Search Route
+app.use("/api/public", require("./routes/publicRoutes")); // ✅ Public Data (Testimonials)
 
 // ✅ Global Error Handler
 app.use((err, req, res, next) => {
