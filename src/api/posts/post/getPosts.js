@@ -21,7 +21,7 @@ const getPosts = async (req, res) => {
         .populate("user", "name profilePicture points.total")
         .populate({ path: "comments.user", select: "name profilePicture points.total" })
         .populate({ path: "comments.replies.user", select: "name profilePicture points.total" })
-        .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId" })
+        .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId enrollmentNumber course semester" })
         .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture" })
         .populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId points.total" } })
         .populate({ path: "announcementDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId points.total" } });
@@ -109,7 +109,7 @@ const getPosts = async (req, res) => {
       .populate("user", "name profilePicture points.total")
       .populate({ path: "comments.user", select: "name profilePicture points.total" })
       .populate({ path: "comments.replies.user", select: "name profilePicture points.total" })
-      .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId" })
+      .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId enrollmentNumber course semester" })
       .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture" })
       .populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId points.total" } })
       .populate({ path: "announcementDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId points.total" } });

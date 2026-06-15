@@ -78,7 +78,7 @@ const createPost = async (req, res) => {
     await post.save();
     const populated = await Post.findById(post._id)
       .populate("user", "name profilePicture")
-      .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId" })
+      .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId enrollmentNumber course semester" })
       .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture" });
     
     req.io?.emit("postCreated", populated);
