@@ -22,7 +22,7 @@ module.exports = async (req, res) => {
     }
 
     const users = await User.find(filter)
-    .select("name publicId enrollmentNumber profilePicture role")
+    .select("name publicId enrollmentNumber profilePicture role course semester")
     .limit(10);
 
     res.json(users);
