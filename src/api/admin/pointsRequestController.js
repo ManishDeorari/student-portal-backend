@@ -12,7 +12,7 @@ const getPendingPointsRequests = async (req, res) => {
       ]
     })
     .populate("user", "name profilePicture enrollmentNumber")
-    .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId enrollmentNumber" })
+    .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId enrollmentNumber course semester" })
     .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture" })
     .populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId" } })
     .populate({ path: "announcementDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId" } })

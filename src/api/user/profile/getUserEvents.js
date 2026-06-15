@@ -59,8 +59,10 @@ const getUserEvents = async (req, res) => {
         { "announcementDetails.winners.groupMembers": targetUserId }
       ]
     })
-    .populate("announcementDetails.originalEventId")
+    .populate({ path: "announcementDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture publicId" } })
     .populate("user", "name profilePicture publicId")
+    .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId enrollmentNumber course semester" })
+    .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture" })
     .sort({ createdAt: -1 });
 
     res.json({
