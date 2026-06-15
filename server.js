@@ -198,10 +198,10 @@ const apiLimiter = rateLimit({
 });
 app.use("/api", apiLimiter);
 
-// 2. Strict Rate Limiting for Auth (20 requests per 15 mins)
+// 2. Strict Rate Limiting for Auth (100 requests per 5 mins)
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 20,
+  windowMs: 5 * 60 * 1000,
+  max: 100,
   message: { message: "Too many authentication attempts, please try again later" },
   standardHeaders: true,
   legacyHeaders: false,
