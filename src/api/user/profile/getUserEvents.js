@@ -24,7 +24,7 @@ const getUserEvents = async (req, res) => {
         { userId: targetUserId },
         { groupMembers: targetUserId }
       ]
-    }).populate("eventId").sort({ createdAt: -1 });
+    }).populate({ path: "eventId", populate: { path: "user", select: "name profilePicture publicId" } }).sort({ createdAt: -1 });
 
     const registeredEvents = registrations.map(reg => reg.eventId).filter(e => e);
 
@@ -32,7 +32,7 @@ const getUserEvents = async (req, res) => {
     const reposts = await Post.find({
       user: targetUserId,
       type: "EventRepost"
-    }).populate("eventRepostDetails.originalEventId").sort({ createdAt: -1 });
+    }).populate({ path: "eventRepostDetails.originalEventId", populate: { path: "user", select: "name profilePicture publicId" } }).sort({ createdAt: -1 });
 
     const repostedEvents = reposts
       .map(p => p.eventRepostDetails?.originalEventId)
