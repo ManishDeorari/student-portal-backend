@@ -188,30 +188,30 @@ console.log("🟢 Middleware setup...");
 // Security Headers
 app.use(helmet());
 
-// 1. Global Rate Limiting (600 requests per 10 mins)
+// 1. Global Rate Limiting (4000 requests per 10 mins)
 const apiLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, 
-  max: 600, 
+  max: 4000, 
   message: { message: "Too many requests from this IP, please try again after 10 minutes" },
   standardHeaders: true,
   legacyHeaders: false,
 });
 app.use("/api", apiLimiter);
 
-// 2. Strict Rate Limiting for Auth (100 requests per 5 mins)
+// 2. Strict Rate Limiting for Auth (500 requests per 5 mins)
 const authLimiter = rateLimit({
   windowMs: 5 * 60 * 1000,
-  max: 100,
+  max: 500,
   message: { message: "Too many authentication attempts, please try again later" },
   standardHeaders: true,
   legacyHeaders: false,
 });
 app.use("/api/auth", authLimiter);
 
-// 3. Medium Rate Limiting for Content Creation (50 requests per 15 mins)
+// 3. Medium Rate Limiting for Content Creation (150 requests per 15 mins)
 const contentLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 50,
+  max: 150,
   message: { message: "Too many posts/events created. Please slow down." },
   standardHeaders: true,
   legacyHeaders: false,
