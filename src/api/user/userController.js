@@ -20,4 +20,5 @@ module.exports = {
   profilePointsRequest: require("./profile/pointsRequest"),
   searchUsers: require("./getUsers/searchUsers"),
   getUserEvents: require("./profile/getUserEvents"),
+  getResumePdf: require("./profile/getResumePdf"),
 };

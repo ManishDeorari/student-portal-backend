@@ -17,6 +17,7 @@ const {
   searchUsers,
   getUserEvents,
   getTopEarners,
+  getResumePdf,
 } = require("../src/api/user/userController");
 
 // ------- PROFILE ROUTES -------
@@ -40,5 +41,6 @@ router.get("/search", auth, searchUsers);
 // ------- DYNAMIC ROUTES (MUST BE LAST) -------
 router.get("/:id", auth, getPublicProfile);
 router.get("/:id/events", auth, getUserEvents);
+router.get("/:id/resume", auth, getResumePdf);
 
 module.exports = router;
