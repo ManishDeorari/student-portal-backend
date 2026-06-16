@@ -19,25 +19,32 @@ router.get("/proxy", auth, async (req, res) => {
       return res.status(403).json({ message: "Invalid domain. Only Cloudinary URLs are allowed." });
     }
 
-    https.get(fileUrl, (stream) => {
-      if (stream.statusCode !== 200) {
-         const statusCode = stream.statusCode === 401 ? 502 : stream.statusCode;
-         return res.status(statusCode).json({ message: "Error fetching file from storage" });
+    // Fetch the PDF from Cloudinary using fetch API
+    const response = await fetch(fileUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "Accept": "*/*"
       }
-
-      // Pass content type along
-      if (stream.headers["content-type"]) {
-        res.setHeader("Content-Type", stream.headers["content-type"]);
-      }
-      
-      const filename = req.query.name ? encodeURIComponent(req.query.name) : "document";
-      res.setHeader("Content-Disposition", `inline; filename="${filename}"`);
-      
-      stream.pipe(res);
-    }).on("error", (err) => {
-      console.error("Error proxying file:", err);
-      res.status(500).json({ message: "Error fetching file" });
     });
+
+    if (!response.ok) {
+       console.error("Cloudinary returned:", response.status, response.statusText);
+       const statusCode = response.status === 401 ? 502 : response.status;
+       return res.status(statusCode).json({ message: "Error fetching file from storage" });
+    }
+
+    // Pass content type along
+    const contentType = response.headers.get("content-type");
+    if (contentType) {
+      res.setHeader("Content-Type", contentType);
+    }
+    
+    const filename = req.query.name ? encodeURIComponent(req.query.name) : "document";
+    res.setHeader("Content-Disposition", `inline; filename="${filename}"`);
+    
+    // Pipe response body to express response
+    const { Readable } = require('stream');
+    Readable.fromWeb(response.body).pipe(res);
 
   } catch (error) {
     console.error("Proxy Error:", error);

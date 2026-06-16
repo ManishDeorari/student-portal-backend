@@ -13,21 +13,26 @@ module.exports = async (req, res) => {
 
     const resumeUrl = targetUser.resume;
 
-    // Fetch the PDF from Cloudinary and stream it to the client
-    https.get(resumeUrl, (stream) => {
-      if (stream.statusCode !== 200) {
-         const statusCode = stream.statusCode === 401 ? 502 : stream.statusCode;
-         return res.status(statusCode).json({ message: "Error fetching resume from storage" });
+    // Fetch the PDF from Cloudinary using fetch API
+    const response = await fetch(resumeUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "Accept": "*/*"
       }
-
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", "inline; filename=resume.pdf");
-      
-      stream.pipe(res);
-    }).on("error", (err) => {
-      console.error("Error streaming resume:", err);
-      res.status(500).json({ message: "Error fetching resume" });
     });
+
+    if (!response.ok) {
+       console.error("Cloudinary returned:", response.status, response.statusText);
+       const statusCode = response.status === 401 ? 502 : response.status;
+       return res.status(statusCode).json({ message: "Error fetching resume from storage" });
+    }
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "inline; filename=resume.pdf");
+    
+    // Pipe response body to express response
+    const { Readable } = require('stream');
+    Readable.fromWeb(response.body).pipe(res);
 
   } catch (error) {
     console.error("getResumePdf Error:", error);
