@@ -77,6 +77,8 @@ const registerEvent = async (req, res) => {
              userToUpdate.points.studentParticipation = (userToUpdate.points.studentParticipation || 0) + event.pointsAssigned;
           }
           
+          userToUpdate.points.participationPoints = (userToUpdate.points.participationPoints || 0) + event.pointsAssigned;
+          
           userToUpdate.eventPointsAwarded.push(event._id);
           await userToUpdate.save();
 

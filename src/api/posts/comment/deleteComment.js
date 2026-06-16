@@ -57,8 +57,8 @@ const deleteComment = async (req, res) => {
         if (commentAuthor.points.comments !== undefined) {
           commentAuthor.points.comments = Math.max(0, commentAuthor.points.comments - (config.commentPoints || 3));
         }
-        if (commentAuthor.points.engagement !== undefined) {
-          commentAuthor.points.engagement = Math.max(0, commentAuthor.points.engagement - (config.commentPoints || 3));
+        if (commentAuthor.points.contentContribution !== undefined) {
+          commentAuthor.points.contentContribution = Math.max(0, commentAuthor.points.contentContribution - (config.commentPoints || 3));
         }
 
         if (commentAuthor.commentPointLogs && commentAuthor.commentPointLogs.length > 0) {

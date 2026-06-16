@@ -49,6 +49,30 @@ const deleteReply = async (req, res) => {
 
     await post.save();
 
+    // ✅ Revoke Points
+    try {
+      const PointsSystemConfig = require("../../../../models/PointsSystemConfig");
+      const config = (await PointsSystemConfig.findOne()) || { commentPoints: 3 }; // using commentPoints/2 or similar if available, else default 2
+      const replyPoints = 2; // Fixed value or config if available
+
+      const replyAuthor = await User.findById(reply.user);
+      if (replyAuthor && replyAuthor.points) {
+        replyAuthor.points.total = Math.max(0, (replyAuthor.points.total || 0) - replyPoints);
+        
+        if (replyAuthor.points.replies !== undefined) {
+          replyAuthor.points.replies = Math.max(0, replyAuthor.points.replies - replyPoints);
+        }
+        if (replyAuthor.points.contentContribution !== undefined) {
+          replyAuthor.points.contentContribution = Math.max(0, replyAuthor.points.contentContribution - replyPoints);
+        }
+
+        await replyAuthor.save();
+        console.log(`✅ Revoked ${replyPoints} points from user ${replyAuthor.name} for reply deletion.`);
+      }
+    } catch (revokeErr) {
+      console.error("❌ Failed to revoke points for reply deletion:", revokeErr.message);
+    }
+
     const updated = await Post.findById(post._id)
       .populate("user", "name profilePicture")
       .populate({ path: "comments.user", select: "name profilePicture" })

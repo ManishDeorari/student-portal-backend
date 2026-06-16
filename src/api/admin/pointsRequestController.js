@@ -148,6 +148,7 @@ const approvePointsRequest = async (req, res) => {
               if (!user.points) user.points = { total: 0 };
               user.points.total = (user.points.total || 0) + pointsToAward;
               user.points.studentParticipation = (user.points.studentParticipation || 0) + pointsToAward;
+              user.points.rankingPoints = (user.points.rankingPoints || 0) + pointsToAward;
               await user.save();
 
               const eventName = post.announcementDetails?.eventName || "an event";
@@ -198,6 +199,7 @@ const approvePointsRequest = async (req, res) => {
           } else {
             user.points.studentParticipation = (user.points.studentParticipation || 0) + pointsToAward;
           }
+          user.points.repostingPoints = (user.points.repostingPoints || 0) + pointsToAward;
 
           user.eventPointsAwarded.push(post.eventRepostDetails.originalEventId);
           await user.save();
@@ -299,7 +301,8 @@ const approveProfilePointsRequest = async (req, res) => {
       
       if (!user.points) user.points = { total: 0 };
       user.points.total = (user.points.total || 0) + pointsToAward;
-      user.points.profileCompletion = (user.points.profileCompletion || 0) + pointsToAward;
+      user.points.studentEngagement = (user.points.studentEngagement || 0) + pointsToAward;
+      user.points[`${field}Points`] = (user.points[`${field}Points`] || 0) + pointsToAward;
       user[statusField] = "approved";
       await user.save();
 
@@ -318,7 +321,7 @@ const approveProfilePointsRequest = async (req, res) => {
         req.io.to(userRoom).emit("pointsUpdated", {
           totalPoints: user.points.total,
           awardedPoints: pointsToAward,
-          category: "profileCompletion",
+          category: "studentEngagement",
           reason: `Added ${field}`
         });
       }
