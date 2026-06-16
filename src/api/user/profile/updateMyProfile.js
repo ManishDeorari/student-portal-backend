@@ -12,13 +12,17 @@ module.exports = async (req, res) => {
       oldImageUrl.includes("res.cloudinary.com") &&
       !oldImageUrl.includes("default-profile.jpg")
     ) {
-      const publicId = extractPublicId(oldImageUrl);
+      const isRaw = oldImageUrl.includes("/raw/");
+      const publicId = extractPublicId(oldImageUrl, isRaw);
       if (publicId) {
         try {
-          await cloudinary.uploader.destroy(publicId, { invalidate: true });
-          console.log(`🗑 Deleted old Cloudinary image: ${publicId}`);
+          await cloudinary.uploader.destroy(publicId, { 
+             invalidate: true, 
+             resource_type: isRaw ? "raw" : "image" 
+          });
+          console.log(`🗑 Deleted old Cloudinary file: ${publicId}`);
         } catch (err) {
-          console.error("❌ Failed to delete old image from Cloudinary:", err);
+          console.error("❌ Failed to delete old file from Cloudinary:", err);
         }
       }
     }
@@ -161,7 +165,7 @@ module.exports = async (req, res) => {
 };
 
 // 🔍 More robust extractPublicId
-function extractPublicId(imageUrl) {
+function extractPublicId(imageUrl, isRaw = false) {
   try {
     // Remove query params
     imageUrl = imageUrl.split("?")[0];
@@ -173,6 +177,9 @@ function extractPublicId(imageUrl) {
     // Remove any version number like /v123456/
     const noVersion = afterUpload.replace(/v\d+\//, "");
 
+    // For raw files, keep the extension!
+    if (isRaw) return noVersion;
+
     // Remove file extension
     return noVersion.substring(0, noVersion.lastIndexOf(".")) || noVersion;
   } catch (e) {
@@ -180,3 +187,4 @@ function extractPublicId(imageUrl) {
     return null;
   }
 }
+module.exports = module.exports;
