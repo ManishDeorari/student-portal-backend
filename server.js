@@ -260,6 +260,7 @@ app.use("/api/points-requests", pointsRequestRoutes);
 app.use("/api/search", require("./routes/searchRoutes")); // ✅ Global Search Route
 app.use("/api/public", require("./routes/publicRoutes")); // ✅ Public Data (Testimonials)
 app.use("/api/dashboard", require("./routes/dashboardRoutes")); // ✅ Dashboard Stats
+app.use("/api/files", require("./routes/fileRoutes")); // ✅ Secure File Proxy
 
 // ✅ Global Error Handler
 app.use((err, req, res, next) => {
