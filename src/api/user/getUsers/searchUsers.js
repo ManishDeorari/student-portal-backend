@@ -12,7 +12,9 @@ module.exports = async (req, res) => {
       $or: [
         { name: { $regex: q, $options: "i" } },
         { publicId: { $regex: q, $options: "i" } },
-        { enrollmentNumber: { $regex: q, $options: "i" } }
+        { enrollmentNumber: { $regex: q, $options: "i" } },
+        { employeeId: { $regex: q, $options: "i" } },
+        { email: { $regex: q, $options: "i" } }
       ]
     };
 
