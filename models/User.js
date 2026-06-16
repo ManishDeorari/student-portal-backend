@@ -108,6 +108,9 @@ const UserSchema = new mongoose.Schema(
     department: String,
     profilePicture: String,
     bannerImage: String,
+    secondaryEmail: String,
+    universityRollNumber: String,
+    domain: String,
 
     // Detailed Profile Fields
     phone: String,
