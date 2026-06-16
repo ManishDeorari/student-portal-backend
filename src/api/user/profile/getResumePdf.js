@@ -16,7 +16,8 @@ module.exports = async (req, res) => {
     // Fetch the PDF from Cloudinary and stream it to the client
     https.get(resumeUrl, (stream) => {
       if (stream.statusCode !== 200) {
-         return res.status(stream.statusCode).json({ message: "Error fetching resume from storage" });
+         const statusCode = stream.statusCode === 401 ? 502 : stream.statusCode;
+         return res.status(statusCode).json({ message: "Error fetching resume from storage" });
       }
 
       res.setHeader("Content-Type", "application/pdf");

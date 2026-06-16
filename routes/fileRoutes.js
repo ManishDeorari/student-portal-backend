@@ -21,7 +21,8 @@ router.get("/proxy", auth, async (req, res) => {
 
     https.get(fileUrl, (stream) => {
       if (stream.statusCode !== 200) {
-         return res.status(stream.statusCode).json({ message: "Error fetching file from storage" });
+         const statusCode = stream.statusCode === 401 ? 502 : stream.statusCode;
+         return res.status(statusCode).json({ message: "Error fetching file from storage" });
       }
 
       // Pass content type along

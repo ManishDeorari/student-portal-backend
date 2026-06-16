@@ -250,7 +250,7 @@ const getPendingProfilePointsRequests = async (req, res) => {
         { githubPointsStatus: "pending" },
         { portfolioPointsStatus: "pending" }
       ]
-    }).select("name profilePicture enrollmentNumber resume github portfolio resumePointsStatus githubPointsStatus portfolioPointsStatus");
+    }).select("name profilePicture enrollmentNumber course semester resume github portfolio resumePointsStatus githubPointsStatus portfolioPointsStatus");
 
     res.json(users);
   } catch (error) {
