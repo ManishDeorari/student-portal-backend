@@ -12,11 +12,11 @@ const deleteEvent = async (req, res) => {
     }
 
     // Cleanup 1: Delete images from Cloudinary
-    const cloudinary = require("cloudinary").v2;
+    const cloudinary = require("../../../../config/cloudinary");
     for (const image of event.images || []) {
       if (image.public_id) {
         try {
-          await cloudinary.uploader.destroy(image.public_id, { resource_type: "image" });
+          await cloudinary.uploader.destroy(image.public_id, { resource_type: "image", invalidate: true });
         } catch (err) {
           console.error("❌ Image delete failed:", err.message);
         }
@@ -30,6 +30,7 @@ const deleteEvent = async (req, res) => {
         try {
           const result = await cloudinary.uploader.destroy(event.video.public_id, {
             resource_type: type,
+            invalidate: true
           });
           if (result.result === "ok") break;
         } catch (err) {

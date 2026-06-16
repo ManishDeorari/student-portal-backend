@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
       const publicId = extractPublicId(oldImageUrl);
       if (publicId) {
         try {
-          await cloudinary.uploader.destroy(publicId);
+          await cloudinary.uploader.destroy(publicId, { invalidate: true });
           console.log(`🗑 Deleted old Cloudinary banner: ${publicId}`);
         } catch (err) {
           console.error("❌ Failed to delete old banner from Cloudinary:", err);

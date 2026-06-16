@@ -40,7 +40,7 @@ router.get("/proxy", auth, async (req, res) => {
     }
     
     const filename = req.query.name ? encodeURIComponent(req.query.name) : "document";
-    res.setHeader("Content-Disposition", `inline; filename="${filename}"`);
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
     
     // Pipe response body to express response
     const { Readable } = require('stream');

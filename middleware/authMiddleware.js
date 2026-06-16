@@ -4,16 +4,23 @@ const User = require("../models/User"); // Make sure this path is correct
 module.exports = async function (req, res, next) {
   const authHeader = req.header("Authorization");
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  let token = null;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const parts = authHeader.split(" ");
+    if (parts.length === 2) {
+      token = parts[1];
+    }
+  }
+
+  // Fallback to query parameter (useful for file downloads)
+  if (!token && req.query.token) {
+    token = req.query.token;
+  }
+
+  if (!token) {
     return res.status(401).json({ message: "No token, authorization denied" });
   }
-
-  const parts = authHeader.split(" ");
-  if (parts.length !== 2) {
-    return res.status(401).json({ message: "Token format invalid" });
-  }
-
-  const token = parts[1];
 
   if (!token || token === "null" || token === "undefined") {
     return res.status(401).json({ message: "Token is null or undefined" });

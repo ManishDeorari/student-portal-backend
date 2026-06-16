@@ -1,5 +1,5 @@
 const Post = require("../../../../models/Post");
-const cloudinary = require("cloudinary").v2;
+const cloudinary = require("../../../../config/cloudinary");
 
 const deletePost = async (req, res) => {
   try {
@@ -38,7 +38,7 @@ const deletePost = async (req, res) => {
     for (const image of post.images || []) {
       if (image.public_id) {
         try {
-          await cloudinary.uploader.destroy(image.public_id, { resource_type: "image" });
+          await cloudinary.uploader.destroy(image.public_id, { resource_type: "image", invalidate: true });
         } catch (err) {
           console.error("❌ Image delete failed:", err.message);
         }
@@ -51,6 +51,7 @@ const deletePost = async (req, res) => {
         try {
           const result = await cloudinary.uploader.destroy(post.video.public_id, {
             resource_type: type,
+            invalidate: true
           });
           if (result.result === "ok") break;
         } catch (err) {
@@ -65,7 +66,7 @@ const deletePost = async (req, res) => {
         let deleted = false;
         for (const type of fallbackTypes) {
           try {
-            const result = await cloudinary.uploader.destroy(doc.public_id, { resource_type: type });
+            const result = await cloudinary.uploader.destroy(doc.public_id, { resource_type: type, invalidate: true });
             if (result.result === "ok" || result.result === "not found") {
               deleted = true;
               break;
@@ -73,7 +74,7 @@ const deletePost = async (req, res) => {
             // If raw failed, try removing extension and use image type
             if (type === "raw" && result.result !== "ok") {
               const withoutExt = doc.public_id.substring(0, doc.public_id.lastIndexOf(".")) || doc.public_id;
-              const imgResult = await cloudinary.uploader.destroy(withoutExt, { resource_type: "image" });
+              const imgResult = await cloudinary.uploader.destroy(withoutExt, { resource_type: "image", invalidate: true });
               if (imgResult.result === "ok") {
                  deleted = true;
                  break;

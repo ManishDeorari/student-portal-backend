@@ -359,7 +359,7 @@ const performDeepDelete = async (userId) => {
       
       for (const resourceType of fallbackRotation) {
         try {
-          const res = await cloudinary.uploader.destroy(item.id, { resource_type: resourceType });
+          const res = await cloudinary.uploader.destroy(item.id, { resource_type: resourceType, invalidate: true });
           if (res.result === "ok") {
             console.log(`🗑  [Cloudinary] Successfully destroyed ${item.id} as ${resourceType}`);
             successfullyDeleted = true;

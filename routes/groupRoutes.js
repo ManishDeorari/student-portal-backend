@@ -249,7 +249,7 @@ router.put("/:groupId/settings", checkAuth, checkAdmin, async (req, res) => {
                 const publicId = extractPublicId(oldImageUrl);
                 if (publicId) {
                     try {
-                        await cloudinary.uploader.destroy(publicId);
+                        await cloudinary.uploader.destroy(publicId, { invalidate: true });
                         console.log(`🗑 Deleted old group image: ${publicId}`);
                     } catch (err) {
                         console.error("❌ Failed to delete old group image:", err);
@@ -433,7 +433,7 @@ router.delete("/:groupId/messages/:messageId", checkAuth, async (req, res) => {
             const fallbackTypes = ["image", "video", "raw"];
             for (const type of fallbackTypes) {
                 try {
-                    const result = await cloudinary.uploader.destroy(message.mediaPublicId, { resource_type: type });
+                    const result = await cloudinary.uploader.destroy(message.mediaPublicId, { resource_type: type, invalidate: true });
                     if (result.result === "ok") break;
                 } catch (err) {}
             }
@@ -511,7 +511,7 @@ router.delete("/:groupId/image", checkAuth, checkAdmin, async (req, res) => {
             const publicId = extractPublicId(group.profileImage);
             if (publicId) {
                 try {
-                    await cloudinary.uploader.destroy(publicId);
+                    await cloudinary.uploader.destroy(publicId, { invalidate: true });
                     console.log(`🗑 Deleted group image for reset: ${publicId}`);
                 } catch (err) {
                     console.error("❌ Cloudinary deletion failed:", err);
@@ -577,7 +577,7 @@ router.delete("/:groupId", checkAuth, checkAdmin, async (req, res) => {
                     await Promise.all(allPublicIds.map(async (id) => {
                         for (const type of ["image", "video", "raw"]) {
                             try {
-                                const result = await cloudinary.uploader.destroy(id, { resource_type: type });
+                                const result = await cloudinary.uploader.destroy(id, { resource_type: type, invalidate: true });
                                 if (result.result === "ok") break;
                             } catch (err) {}
                         }
