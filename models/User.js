@@ -66,22 +66,6 @@ const EducationSchema = new mongoose.Schema({
   description: { type: String, maxlength: 1000 },
 });
 
-const WorkProfileSchema = new mongoose.Schema({
-  functionalArea: String,
-  subFunctionalArea: String,
-  experience: String,
-  industry: String,
-});
-
-const JobPreferencesSchema = new mongoose.Schema({
-  functionalArea: String,
-  preferredLocations: [String],
-  noticePeriod: String,
-  salary: String,
-  resumeLink: String,
-  portfolioLink: String,
-});
-
 // ===================== Main User Schema =====================
 const UserSchema = new mongoose.Schema(
   {
@@ -122,8 +106,14 @@ const UserSchema = new mongoose.Schema(
     experience: [ExperienceSchema],
     skills: [String],
 
-    workProfile: { type: WorkProfileSchema, default: {} },
-    jobPreferences: { type: JobPreferencesSchema, default: {} },
+    // Resume and Links
+    resume: String,
+    github: String,
+    portfolio: String,
+
+    resumePointsStatus: { type: String, enum: ["none", "pending", "approved", "rejected"], default: "none" },
+    githubPointsStatus: { type: String, enum: ["none", "pending", "approved", "rejected"], default: "none" },
+    portfolioPointsStatus: { type: String, enum: ["none", "pending", "approved", "rejected"], default: "none" },
 
     // Networking connections
     connections: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],

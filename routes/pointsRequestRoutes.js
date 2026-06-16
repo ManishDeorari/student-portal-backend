@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const auth = require("../middleware/authMiddleware");
-const { getPendingPointsRequests, approvePointsRequest } = require("../src/api/admin/pointsRequestController");
+const { getPendingPointsRequests, approvePointsRequest, getPendingProfilePointsRequests, approveProfilePointsRequest } = require("../src/api/admin/pointsRequestController");
 
 const verifyAdmin = async (req, res, next) => {
   if (!req.user || !req.user.isAdmin) {
@@ -12,5 +12,8 @@ const verifyAdmin = async (req, res, next) => {
 
 router.get("/pending", auth, verifyAdmin, getPendingPointsRequests);
 router.patch("/:postId/action", auth, verifyAdmin, approvePointsRequest);
+
+router.get("/profile/pending", auth, verifyAdmin, getPendingProfilePointsRequests);
+router.patch("/profile/:userId/action", auth, verifyAdmin, approveProfilePointsRequest);
 
 module.exports = router;

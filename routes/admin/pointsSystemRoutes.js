@@ -282,6 +282,9 @@ router.post("/trigger-rollover", authenticate, verifyMainAdmin, async (req, res)
             // Reset point logs
             user.postPointLogs = [];
             user.profileCompletionAwarded = false;
+            user.resumePointsStatus = "none";
+            user.githubPointsStatus = "none";
+            user.portfolioPointsStatus = "none";
 
             // Re-evaluate profile completion for the new year
             const hasProfilePic = user.profilePicture && !user.profilePicture.includes("default-profile.jpg");

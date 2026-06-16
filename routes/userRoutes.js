@@ -13,6 +13,7 @@ const {
   getAwardEligibleUsers,
   getMyPosts,
   getMyActivity,
+  profilePointsRequest,
   searchUsers,
   getUserEvents,
   getTopEarners,
@@ -22,6 +23,7 @@ const {
 router.get("/me", auth, getMyProfile);
 router.put("/update", auth, updateMyProfile);
 router.get("/myposts", auth, getMyPosts);
+router.post("/points-request", auth, profilePointsRequest);
 // ------- CONNECTION ROUTES -------
 router.get("/all", auth, getAllUsers);
 router.get("/top-earners", auth, getTopEarners);

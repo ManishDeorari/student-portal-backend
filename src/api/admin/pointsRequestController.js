@@ -242,7 +242,100 @@ const approvePointsRequest = async (req, res) => {
   }
 };
 
+const getPendingProfilePointsRequests = async (req, res) => {
+  try {
+    const users = await User.find({
+      $or: [
+        { resumePointsStatus: "pending" },
+        { githubPointsStatus: "pending" },
+        { portfolioPointsStatus: "pending" }
+      ]
+    }).select("name profilePicture enrollmentNumber resume github portfolio resumePointsStatus githubPointsStatus portfolioPointsStatus");
+
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch profile points requests" });
+  }
+};
+
+const approveProfilePointsRequest = async (req, res) => {
+  const { userId } = req.params;
+  const { action, field } = req.body; // action: 'approve' or 'reject', field: 'resume', 'github', or 'portfolio'
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const statusField = `${field}PointsStatus`;
+    if (user[statusField] !== "pending") {
+      return res.status(400).json({ message: "Request is not pending" });
+    }
+
+    if (action === "reject") {
+      user[statusField] = "rejected";
+      
+      const newNotification = new Notification({
+        sender: req.user._id,
+        receiver: user._id,
+        type: "admin_notice",
+        message: `Your points request for adding your ${field} was declined by the Admin.`
+      });
+      await newNotification.save();
+
+      if (req.io) {
+        const senderInfo = { _id: req.user._id, name: req.user.name, profilePicture: req.user.profilePicture };
+        const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture");
+        req.io.to(user._id.toString()).emit("newNotification", { ...populatedNotification.toObject(), sender: senderInfo });
+      }
+
+      await user.save();
+      return res.json({ message: "Profile points request rejected" });
+    }
+
+    if (action === "approve") {
+      const pointsToAward = 10;
+      
+      if (!user.points) user.points = { total: 0 };
+      user.points.total = (user.points.total || 0) + pointsToAward;
+      user.points.profileCompletion = (user.points.profileCompletion || 0) + pointsToAward;
+      user[statusField] = "approved";
+      await user.save();
+
+      const newNotification = new Notification({
+        sender: req.user._id,
+        receiver: user._id,
+        type: "points_earned",
+        message: `Congratulations! You earned ${pointsToAward} points for adding your ${field}.`
+      });
+      await newNotification.save();
+
+      if (req.io) {
+        const senderInfo = { _id: req.user._id, name: req.user.name, profilePicture: req.user.profilePicture };
+        const userRoom = user._id.toString();
+        req.io.to(userRoom).emit("newNotification", { ...newNotification.toObject(), sender: senderInfo });
+        req.io.to(userRoom).emit("pointsUpdated", {
+          totalPoints: user.points.total,
+          awardedPoints: pointsToAward,
+          category: "profileCompletion",
+          reason: `Added ${field}`
+        });
+      }
+
+      return res.json({ message: "Profile points request approved and awarded" });
+    }
+
+    res.status(400).json({ message: "Invalid action" });
+  } catch (error) {
+    console.error("Profile points approval error:", error);
+    res.status(500).json({ message: "Failed to process profile points request" });
+  }
+};
+
 module.exports = {
   getPendingPointsRequests,
-  approvePointsRequest
+  approvePointsRequest,
+  getPendingProfilePointsRequests,
+  approveProfilePointsRequest
 };
