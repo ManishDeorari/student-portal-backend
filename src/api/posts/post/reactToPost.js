@@ -70,7 +70,6 @@ module.exports = async (req, res) => {
             const pts = config.likePoints || 2;
 
             user.points.total = (user.points.total || 0) + pts;
-            user.points.likes = (user.points.likes || 0) + pts;
             user.points.studentEngagement = (user.points.studentEngagement || 0) + pts;
 
             // Update logs
@@ -118,7 +117,6 @@ module.exports = async (req, res) => {
 
         if (user && user.points) {
           user.points.total = Math.max(0, (user.points.total || 0) - pts);
-          user.points.likes = Math.max(0, (user.points.likes || 0) - pts);
           user.points.studentEngagement = Math.max(0, (user.points.studentEngagement || 0) - pts);
 
           if (user.likePointLogs && user.likePointLogs.length > 0) {

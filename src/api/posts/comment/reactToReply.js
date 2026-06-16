@@ -68,7 +68,6 @@ const reactToReply = async (req, res) => {
             const pts = config.likePoints || 2;
 
             user.points.total = (user.points.total || 0) + pts;
-            user.points.likes = (user.points.likes || 0) + pts;
             user.points.studentEngagement = (user.points.studentEngagement || 0) + pts;
 
             // Update logs

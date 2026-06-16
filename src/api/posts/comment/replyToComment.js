@@ -52,7 +52,6 @@ const replyToComment = async (req, res) => {
             const pts = config.commentPoints || 3;
 
             user.points.total = (user.points.total || 0) + pts;
-            user.points.comments = (user.points.comments || 0) + pts;
             user.points.contentContribution = (user.points.contentContribution || 0) + pts;
 
             // Update logs

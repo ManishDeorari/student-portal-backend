@@ -23,10 +23,12 @@ module.exports = async (req, res) => {
         user.points.login = (user.points.login || 0) + pointsToAdd;
         
         // Update total
-        user.points.total = Object.keys(user.points.toObject()).reduce((sum, key) => {
-          if (["total", "_id", "__v"].includes(key)) return sum;
-          return sum + (user.points[key] || 0);
-        }, 0);
+        const categories = [
+            "profileCompletion", "studentEngagement", "referrals",
+            "contentContribution", "campusEngagement", "innovationSupport",
+            "studentParticipation", "alumniParticipation", "penalty", "login", "other"
+        ];
+        user.points.total = categories.reduce((sum, key) => sum + (user.points[key] || 0), 0);
 
         user.lastLoginPointAwardedAt = new Date();
         await user.save();

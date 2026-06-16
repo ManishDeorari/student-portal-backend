@@ -90,9 +90,6 @@ const deletePost = async (req, res) => {
         // Subtract points safely
         postAuthor.points.total = Math.max(0, (postAuthor.points.total || 0) - (config.postPoints || 10));
         
-        if (postAuthor.points.posts !== undefined) {
-          postAuthor.points.posts = Math.max(0, postAuthor.points.posts - (config.postPoints || 10));
-        }
         if (postAuthor.points.contentContribution !== undefined) {
           postAuthor.points.contentContribution = Math.max(0, postAuthor.points.contentContribution - (config.postPoints || 10));
         }

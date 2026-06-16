@@ -54,9 +54,6 @@ const deleteComment = async (req, res) => {
         // Subtract points safely
         commentAuthor.points.total = Math.max(0, (commentAuthor.points.total || 0) - (config.commentPoints || 3));
         
-        if (commentAuthor.points.comments !== undefined) {
-          commentAuthor.points.comments = Math.max(0, commentAuthor.points.comments - (config.commentPoints || 3));
-        }
         if (commentAuthor.points.contentContribution !== undefined) {
           commentAuthor.points.contentContribution = Math.max(0, commentAuthor.points.contentContribution - (config.commentPoints || 3));
         }

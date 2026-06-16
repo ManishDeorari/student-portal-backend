@@ -114,9 +114,6 @@ const createPost = async (req, res) => {
           user.points.total = (user.points.total || 0) + (config.postPoints || 10);
 
           // Add to category
-          if (user.points.posts === undefined) user.points.posts = 0;
-          user.points.posts += (config.postPoints || 10);
-
           if (user.points.contentContribution === undefined) user.points.contentContribution = 0;
           user.points.contentContribution += (config.postPoints || 10);
 

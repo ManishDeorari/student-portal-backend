@@ -70,14 +70,11 @@ const registerEvent = async (req, res) => {
           if (!userToUpdate.points) userToUpdate.points = { total: 0 };
           userToUpdate.points.total = (userToUpdate.points.total || 0) + event.pointsAssigned;
           
-          // alumni portal has alumniParticipation, student portal has studentParticipation
           if (userToUpdate.role === "alumni") {
              userToUpdate.points.alumniParticipation = (userToUpdate.points.alumniParticipation || 0) + event.pointsAssigned;
           } else {
              userToUpdate.points.studentParticipation = (userToUpdate.points.studentParticipation || 0) + event.pointsAssigned;
           }
-          
-          userToUpdate.points.participationPoints = (userToUpdate.points.participationPoints || 0) + event.pointsAssigned;
           
           userToUpdate.eventPointsAwarded.push(event._id);
           await userToUpdate.save();

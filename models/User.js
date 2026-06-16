@@ -10,20 +10,6 @@ const PointsSchema = new mongoose.Schema({
   innovationSupport: { type: Number, default: 0 },
   studentParticipation: { type: Number, default: 0 },
   connections: { type: Number, default: 0 },
-  posts: { type: Number, default: 0 },
-  comments: { type: Number, default: 0 },
-  replies: { type: Number, default: 0 },
-  
-  // Student Engagement sub-fields
-  resumePoints: { type: Number, default: 0 },
-  githubPoints: { type: Number, default: 0 },
-  portfolioPoints: { type: Number, default: 0 },
-
-  // Participation sub-fields
-  participationPoints: { type: Number, default: 0 },
-  repostingPoints: { type: Number, default: 0 },
-  rankingPoints: { type: Number, default: 0 },
-
   penalty: { type: Number, default: 0 },
   login: { type: Number, default: 0 },
   other: { type: Number, default: 0 },

@@ -146,10 +146,7 @@ router.post("/manual-award", authenticate, verifyMainAdmin, async (req, res) => 
         const categories = [
             "profileCompletion", "studentEngagement", "referrals",
             "contentContribution", "campusEngagement", "innovationSupport",
-            "studentParticipation", "alumniParticipation", "connections", "posts", "comments",
-            "likes", "replies", "penalty", "login", "other",
-            "resumePoints", "githubPoints", "portfolioPoints",
-            "participationPoints", "repostingPoints", "rankingPoints"
+            "studentParticipation", "alumniParticipation", "penalty", "login", "other"
         ];
 
         user.points.total = categories.reduce((sum, cat) => sum + (user.points[cat] || 0), 0);
@@ -212,10 +209,7 @@ router.post("/manual-penalty", authenticate, verifyMainAdmin, async (req, res) =
         const categories = [
             "profileCompletion", "studentEngagement", "referrals",
             "contentContribution", "campusEngagement", "innovationSupport",
-            "studentParticipation", "alumniParticipation", "connections", "posts", "comments",
-            "likes", "replies", "penalty", "login", "other",
-            "resumePoints", "githubPoints", "portfolioPoints",
-            "participationPoints", "repostingPoints", "rankingPoints"
+            "studentParticipation", "alumniParticipation", "penalty", "login", "other"
         ];
 
         user.points.total = categories.reduce((sum, cat) => sum + (user.points[cat] || 0), 0);
@@ -275,20 +269,9 @@ router.post("/trigger-rollover", authenticate, verifyMainAdmin, async (req, res)
                 innovationSupport: 0,
                 studentParticipation: 0,
                 alumniParticipation: 0,
-                connections: 0,
-                posts: 0,
-                comments: 0,
-                likes: 0,
-                replies: 0,
                 login: 0,
                 other: 0,
                 penalty: 0,
-                resumePoints: 0,
-                githubPoints: 0,
-                portfolioPoints: 0,
-                participationPoints: 0,
-                repostingPoints: 0,
-                rankingPoints: 0,
                 total: 0,
             };
 

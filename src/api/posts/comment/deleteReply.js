@@ -59,9 +59,6 @@ const deleteReply = async (req, res) => {
       if (replyAuthor && replyAuthor.points) {
         replyAuthor.points.total = Math.max(0, (replyAuthor.points.total || 0) - replyPoints);
         
-        if (replyAuthor.points.replies !== undefined) {
-          replyAuthor.points.replies = Math.max(0, replyAuthor.points.replies - replyPoints);
-        }
         if (replyAuthor.points.contentContribution !== undefined) {
           replyAuthor.points.contentContribution = Math.max(0, replyAuthor.points.contentContribution - replyPoints);
         }
