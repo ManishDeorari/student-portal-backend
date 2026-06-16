@@ -27,6 +27,21 @@ module.exports = async (req, res) => {
     const updates = {
       ...rest,
     };
+    
+    // Fetch current user to check existing points statuses
+    const currentUser = await User.findById(req.user.id);
+    
+    // 🔒 Prevent resetting pointsStatus if already approved (prevents double points loop)
+    if (currentUser && currentUser.resumePointsStatus === "approved" && updates.resumePointsStatus) {
+      delete updates.resumePointsStatus;
+    }
+    if (currentUser && currentUser.githubPointsStatus === "approved" && updates.githubPointsStatus) {
+      delete updates.githubPointsStatus;
+    }
+    if (currentUser && currentUser.portfolioPointsStatus === "approved" && updates.portfolioPointsStatus) {
+      delete updates.portfolioPointsStatus;
+    }
+
     if (profileImage) {
       updates.profilePicture = profileImage;
     }
