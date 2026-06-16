@@ -61,11 +61,29 @@ const deletePost = async (req, res) => {
 
     for (const doc of post.documents || []) {
       if (doc.public_id) {
-        try {
-          await cloudinary.uploader.destroy(doc.public_id, { resource_type: "raw" });
-        } catch (err) {
-          console.error("❌ Document delete failed:", err.message);
+        const fallbackTypes = ["raw", "auto", "image"];
+        let deleted = false;
+        for (const type of fallbackTypes) {
+          try {
+            const result = await cloudinary.uploader.destroy(doc.public_id, { resource_type: type });
+            if (result.result === "ok" || result.result === "not found") {
+              deleted = true;
+              break;
+            }
+            // If raw failed, try removing extension and use image type
+            if (type === "raw" && result.result !== "ok") {
+              const withoutExt = doc.public_id.substring(0, doc.public_id.lastIndexOf(".")) || doc.public_id;
+              const imgResult = await cloudinary.uploader.destroy(withoutExt, { resource_type: "image" });
+              if (imgResult.result === "ok") {
+                 deleted = true;
+                 break;
+              }
+            }
+          } catch (err) {
+            console.error(`❌ Document delete failed as ${type}:`, err.message);
+          }
         }
+        if (!deleted) console.log(`⚠️ Document could not be deleted from Cloudinary: ${doc.public_id}`);
       }
     }
 
