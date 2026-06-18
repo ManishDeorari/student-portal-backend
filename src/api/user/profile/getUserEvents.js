@@ -26,7 +26,11 @@ const getUserEvents = async (req, res) => {
       ]
     }).populate({ path: "eventId", populate: { path: "createdBy", select: "name profilePicture profileCompletionAwarded publicId" } }).sort({ createdAt: -1 });
 
-    const registeredEvents = registrations.map(reg => reg.eventId).filter(e => e);
+    const registeredEvents = registrations.map(reg => {
+      if (!reg.eventId) return null;
+      const ev = reg.eventId.toObject ? reg.eventId.toObject() : reg.eventId;
+      return { ...ev, participationType: "Online Registered" };
+    }).filter(e => e);
 
     // 2. Fetch participated events from EventReposts
     const reposts = await Post.find({
@@ -35,7 +39,11 @@ const getUserEvents = async (req, res) => {
     }).populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture profileCompletionAwarded publicId" } }).sort({ createdAt: -1 });
 
     const repostedEvents = reposts
-      .map(p => p.eventRepostDetails?.originalEventId)
+      .map(p => {
+        if (!p.eventRepostDetails?.originalEventId) return null;
+        const ev = p.eventRepostDetails.originalEventId.toObject ? p.eventRepostDetails.originalEventId.toObject() : p.eventRepostDetails.originalEventId;
+        return { ...ev, participationType: "Event Repost" };
+      })
       .filter(e => e);
 
     // Combine and deduplicate
@@ -62,7 +70,7 @@ const getUserEvents = async (req, res) => {
     .populate({ path: "announcementDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture profileCompletionAwarded publicId" } })
     .populate("user", "name profilePicture profileCompletionAwarded publicId")
     .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture profileCompletionAwarded publicId enrollmentNumber course semester" })
-    .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture profileCompletionAwarded" })
+    .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture profileCompletionAwarded publicId" })
     .sort({ createdAt: -1 });
 
     res.json({
