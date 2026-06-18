@@ -135,7 +135,7 @@ async function sendVisitNotification(req, visitorId, targetUserId) {
     if (req.io) {
       console.log(`📡 [Socket] Attempting to emit notification to ${targetUserId}`);
       const populatedNotification = await Notification.findById(newNotification._id)
-        .populate("sender", "name profilePicture");
+        .populate("sender", "name profilePicture profileCompletionAwarded");
       
       const room = targetUserId.toString();
       req.io.to(room).emit("newNotification", populatedNotification);

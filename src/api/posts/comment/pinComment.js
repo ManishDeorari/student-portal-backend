@@ -39,9 +39,9 @@ const pinComment = async (req, res) => {
 
     // Repopulate post details for socket sync & response
     const updatedPost = await Post.findById(postId)
-      .populate("user", "name profilePicture")
-      .populate("comments.user", "name profilePicture")
-      .populate("comments.replies.user", "name profilePicture");
+      .populate("user", "name profilePicture profileCompletionAwarded")
+      .populate("comments.user", "name profilePicture profileCompletionAwarded")
+      .populate("comments.replies.user", "name profilePicture profileCompletionAwarded");
 
     // Emit live socket update
     if (req.io) {
@@ -68,7 +68,7 @@ const pinComment = async (req, res) => {
         await newNotification.save();
 
         if (req.io) {
-          const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture");
+          const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
           const targetRoom = comment.user.toString();
           req.io.to(targetRoom).emit("newNotification", populatedNotification);
           req.io.to(targetRoom).emit("liveNotification", populatedNotification);

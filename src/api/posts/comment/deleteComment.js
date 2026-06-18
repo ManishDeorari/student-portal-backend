@@ -28,7 +28,7 @@ const deleteComment = async (req, res) => {
         });
         await adminNote.save();
         if (req.io) {
-          const populatedNotification = await Notification.findById(adminNote._id).populate("sender", "name profilePicture");
+          const populatedNotification = await Notification.findById(adminNote._id).populate("sender", "name profilePicture profileCompletionAwarded");
           const targetRoom = comment.user.toString();
           req.io.to(targetRoom).emit("newNotification", populatedNotification);
           req.io.to(targetRoom).emit("liveNotification", populatedNotification);
@@ -71,9 +71,9 @@ const deleteComment = async (req, res) => {
 
     // ✅ Re-fetch post to populate user details before socket emit
     const updated = await Post.findById(post._id)
-      .populate("user", "name profilePicture")
-      .populate({ path: "comments.user", select: "name profilePicture" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture" })
+      .populate("user", "name profilePicture profileCompletionAwarded")
+      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" })
       .lean();
 
     req.io.emit("postUpdated", updated); // send to all sockets

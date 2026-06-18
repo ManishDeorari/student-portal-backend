@@ -42,7 +42,7 @@ router.post("/request", authMiddleware, async (req, res) => {
 
     if (req.io) {
       const populatedNotification = await Notification.findById(newNotification._id)
-        .populate("sender", "name profilePicture");
+        .populate("sender", "name profilePicture profileCompletionAwarded");
       req.io.to(toUserId.toString()).emit("newNotification", populatedNotification);
     }
 

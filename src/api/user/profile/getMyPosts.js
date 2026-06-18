@@ -7,9 +7,9 @@ const getMyPosts = async (req, res) => {
 
     const posts = await Post.find({ user: userId })
       .sort({ createdAt: -1 }) // newest → oldest
-      .populate("user", "name profilePicture")
-      .populate({ path: "comments.user", select: "name profilePicture" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture" });
+      .populate("user", "name profilePicture profileCompletionAwarded")
+      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" });
 
     res.json(posts);
   } catch (err) {

@@ -10,11 +10,11 @@ const getMyPosts = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate("user", "name profilePicture")
-      .populate({ path: "comments.user", select: "name profilePicture" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture" })
-      .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId" })
-      .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture" });
+      .populate("user", "name profilePicture profileCompletionAwarded")
+      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" })
+      .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture profileCompletionAwarded publicId" })
+      .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture profileCompletionAwarded" });
 
     const total = await Post.countDocuments({ user: req.user._id });
 

@@ -4,9 +4,9 @@ const Registration = require("../../../../models/Registration");
 const getEvents = async (req, res) => {
   try {
     const events = await Event.find()
-      .populate("createdBy", "name profilePicture")
-      .populate({ path: "comments.user", select: "name profilePicture" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture" })
+      .populate("createdBy", "name profilePicture profileCompletionAwarded")
+      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" })
       .sort({ createdAt: -1 });
 
     const eventsWithCounts = await Promise.all(events.map(async (event) => {
@@ -35,9 +35,9 @@ const getEvents = async (req, res) => {
 const getEventById = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id)
-      .populate("createdBy", "name profilePicture")
-      .populate({ path: "comments.user", select: "name profilePicture" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture" });
+      .populate("createdBy", "name profilePicture profileCompletionAwarded")
+      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" });
     if (!event) return res.status(404).json({ message: "Event not found" });
 
     const registrationCount = await Registration.countDocuments({ eventId: event._id });

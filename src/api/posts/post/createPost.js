@@ -77,9 +77,9 @@ const createPost = async (req, res) => {
 
     await post.save();
     const populated = await Post.findById(post._id)
-      .populate("user", "name profilePicture")
-      .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId enrollmentNumber course semester" })
-      .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture" });
+      .populate("user", "name profilePicture profileCompletionAwarded")
+      .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture profileCompletionAwarded publicId enrollmentNumber course semester" })
+      .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture profileCompletionAwarded" });
     
     req.io?.emit("postCreated", populated);
 
@@ -135,7 +135,7 @@ const createPost = async (req, res) => {
             await newNotification.save();
 
             if (req.io) {
-              const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture");
+              const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
               const targetRoom = user._id.toString();
               req.io.to(targetRoom).emit("newNotification", populatedNotification);
               req.io.to(targetRoom).emit("liveNotification", populatedNotification);

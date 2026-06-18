@@ -86,8 +86,8 @@ module.exports = async (req, res) => {
       new: true,
     }).select("-password");
 
-    // ✅ Award Points Logic (Strict Checklist)
-    if (updatedUser.role === "student" && !updatedUser.profileCompletionAwarded) {
+    // ✅ Award / Deduct Points Logic (Strict Checklist)
+    if (updatedUser.role === "student") {
       const config = await PointsSystemConfig.findOne() || { profileCompletionPoints: 50 };
 
       const hasProfilePic = updatedUser.profilePicture && !updatedUser.profilePicture.includes("default-profile.jpg");
@@ -124,7 +124,7 @@ module.exports = async (req, res) => {
       const isCompleted = hasProfilePic && hasBanner && hasPhone && hasAddress &&
         hasWhatsApp && hasLinkedIn && hasBio && hasEducation;
 
-      if (isCompleted) {
+      if (isCompleted && !updatedUser.profileCompletionAwarded) {
         if (!updatedUser.points) updatedUser.points = { total: 0 };
         const awardAmount = config.profileCompletionPoints || 50;
 
@@ -146,14 +146,57 @@ module.exports = async (req, res) => {
           await newNotification.save();
 
           if (req.io) {
-            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture");
+            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
             req.io.to(updatedUser._id.toString()).emit("newNotification", populatedNotification);
+            // 🔄 Emit pointsUpdated so UI reflects it immediately
+            req.io.to(updatedUser._id.toString()).emit("pointsUpdated", {
+              awardedPoints: awardAmount,
+              reason: "Profile Completion",
+              totalPoints: updatedUser.points.total
+            });
           }
         } catch (noteErr) {
           console.error("❌ Failed to send profile completion award notice:", noteErr.message);
         }
 
         console.log(`✅ Awarded ${awardAmount} points to user ${updatedUser.name} for FULL profile completion.`);
+      } else if (!isCompleted && updatedUser.profileCompletionAwarded) {
+        // ❌ Deduct Points Logic if profile becomes incomplete
+        if (!updatedUser.points) updatedUser.points = { total: 0 };
+        const awardAmount = config.profileCompletionPoints || 50;
+
+        updatedUser.points.total = Math.max(0, (updatedUser.points.total || 0) - awardAmount);
+        updatedUser.points.profileCompletion = Math.max(0, (updatedUser.points.profileCompletion || 0) - awardAmount);
+
+        updatedUser.profileCompletionAwarded = false;
+        await updatedUser.save();
+
+        try {
+          const Notification = require("../../../../models/Notification");
+          const newNotification = new Notification({
+            sender: updatedUser._id,
+            receiver: updatedUser._id,
+            type: "notice",
+            message: `You lost ${awardAmount} points because your profile is no longer complete.`,
+          });
+          await newNotification.save();
+
+          if (req.io) {
+            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
+            req.io.to(updatedUser._id.toString()).emit("newNotification", populatedNotification);
+            
+            // 🔄 Emit pointsUpdated so UI reflects it immediately
+            req.io.to(updatedUser._id.toString()).emit("pointsUpdated", {
+              awardedPoints: -awardAmount,
+              reason: "Profile Incomplete",
+              totalPoints: updatedUser.points.total
+            });
+          }
+        } catch (noteErr) {
+          console.error("❌ Failed to send profile completion deduction notice:", noteErr.message);
+        }
+
+        console.log(`❌ Deducted ${awardAmount} points from user ${updatedUser.name} due to incomplete profile.`);
       }
     }
 

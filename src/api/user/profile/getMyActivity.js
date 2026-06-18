@@ -6,9 +6,9 @@ const getMyActivity = async (req, res) => {
     const userId = req.user._id;
 
     const posts = await Post.find()
-      .populate("user", "name profilePicture")
-      .populate("comments.user", "name profilePicture")
-      .populate("comments.replies.user", "name profilePicture")
+      .populate("user", "name profilePicture profileCompletionAwarded")
+      .populate("comments.user", "name profilePicture profileCompletionAwarded")
+      .populate("comments.replies.user", "name profilePicture profileCompletionAwarded")
       .sort({ createdAt: -1 });
 
     let activities = [];

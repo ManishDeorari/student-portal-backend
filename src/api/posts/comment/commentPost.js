@@ -19,9 +19,9 @@ const commentPost = async (req, res) => {
 
     // Repopulate with full user details
     const updatedPost = await Post.findById(postId)
-      .populate("user", "name profilePicture")
-      .populate("comments.user", "name profilePicture")
-      .populate("comments.replies.user", "name profilePicture");
+      .populate("user", "name profilePicture profileCompletionAwarded")
+      .populate("comments.user", "name profilePicture profileCompletionAwarded")
+      .populate("comments.replies.user", "name profilePicture profileCompletionAwarded");
 
     // Emit socket update
     req.io.emit("postUpdated", updatedPost);
@@ -39,7 +39,7 @@ const commentPost = async (req, res) => {
       await newNotification.save();
 
       if (req.io) {
-        const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture");
+        const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
         const targetOwnerRoom = updatedPost.user._id.toString();
         req.io.to(targetOwnerRoom).emit("newNotification", populatedNotification);
         req.io.to(targetOwnerRoom).emit("liveNotification", populatedNotification);
@@ -87,7 +87,7 @@ const commentPost = async (req, res) => {
               await newNotification.save();
 
               if (req.io) {
-                const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture");
+                const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
                 const targetRoom = user._id.toString();
                 req.io.to(targetRoom).emit("newNotification", populatedNotification);
                 req.io.to(targetRoom).emit("liveNotification", populatedNotification);

@@ -25,7 +25,7 @@ const deletePost = async (req, res) => {
         });
         await adminNote.save();
         if (req.io) {
-          const populatedNotification = await Notification.findById(adminNote._id).populate("sender", "name profilePicture");
+          const populatedNotification = await Notification.findById(adminNote._id).populate("sender", "name profilePicture profileCompletionAwarded");
           const targetRoom = post.user.toString();
           req.io.to(targetRoom).emit("newNotification", populatedNotification);
           req.io.to(targetRoom).emit("liveNotification", populatedNotification);

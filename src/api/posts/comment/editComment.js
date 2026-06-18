@@ -23,9 +23,9 @@ const editComment = async (req, res) => {
 
     // ✅ Re-fetch post to enable proper populate
     const updated = await Post.findById(post._id)
-      .populate("user", "name profilePicture")
-      .populate({ path: "comments.user", select: "name profilePicture" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture" })
+      .populate("user", "name profilePicture profileCompletionAwarded")
+      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" })
       .lean();
 
     req.io.emit("postUpdated", updated);

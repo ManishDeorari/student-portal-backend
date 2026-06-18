@@ -32,16 +32,16 @@ module.exports = async (req, res) => {
     await post.save();
 
     const updatedPost = await Post.findById(post._id)
-      .populate({ path: "user", select: "name profilePicture" })
+      .populate({ path: "user", select: "name profilePicture profileCompletionAwarded" })
       .populate({
         path: "comments",
         populate: [
-          { path: "user", select: "name profilePicture" },
-          { path: "replies.user", select: "name profilePicture" },
+          { path: "user", select: "name profilePicture profileCompletionAwarded" },
+          { path: "replies.user", select: "name profilePicture profileCompletionAwarded" },
         ],
       })
-      .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture publicId" })
-      .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture" });
+      .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture profileCompletionAwarded publicId" })
+      .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture profileCompletionAwarded" });
 
     const plainPost = updatedPost.toJSON();
 
@@ -90,7 +90,7 @@ module.exports = async (req, res) => {
               await newNotification.save();
 
               if (req.io) {
-                const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture");
+                const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
                 const targetRoom = user._id.toString();
                 req.io.to(targetRoom).emit("newNotification", populatedNotification);
                 req.io.to(targetRoom).emit("liveNotification", populatedNotification);
@@ -144,7 +144,7 @@ module.exports = async (req, res) => {
       await newNotification.save();
 
       if (req.io) {
-        const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture");
+        const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
         const targetOwnerRoom = updatedPost.user._id.toString();
         req.io.to(targetOwnerRoom).emit("newNotification", populatedNotification);
         req.io.to(targetOwnerRoom).emit("liveNotification", populatedNotification);
