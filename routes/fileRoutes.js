@@ -45,6 +45,9 @@ router.get("/proxy", auth, async (req, res) => {
       res.setHeader("Content-Disposition", "inline");
       // Add basic caching headers for performance
       res.setHeader("Cache-Control", "public, max-age=86400, immutable");
+      // Allow rendering across origins
+      res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+      res.setHeader("Access-Control-Allow-Origin", "*");
     } else {
       const filename = req.query.name ? encodeURIComponent(req.query.name) : "document";
       res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
