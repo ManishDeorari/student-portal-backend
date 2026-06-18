@@ -178,7 +178,7 @@ module.exports = async (req, res) => {
           const newNotification = new Notification({
             sender: updatedUser._id,
             receiver: updatedUser._id,
-            type: "notice",
+            type: "points_deducted",
             message: `You lost ${awardAmount} points because your profile is no longer complete.`,
           });
           await newNotification.save();
