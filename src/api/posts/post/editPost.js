@@ -15,10 +15,10 @@ const editPost = async (req, res) => {
 
     await post.save();
 
+    const postPopulateOptions = require("../utils/populatePost");
+
     const updatedPost = await Post.findById(post._id)
-      .populate("user", "name profilePicture profileCompletionAwarded")
-      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" });
+      .populate(postPopulateOptions);
 
     req.io.emit("postUpdated", updatedPost);
     res.json(updatedPost);

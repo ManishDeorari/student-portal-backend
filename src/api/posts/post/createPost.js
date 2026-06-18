@@ -76,10 +76,10 @@ const createPost = async (req, res) => {
     });
 
     await post.save();
+    const postPopulateOptions = require("../utils/populatePost");
+
     const populated = await Post.findById(post._id)
-      .populate("user", "name profilePicture profileCompletionAwarded")
-      .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture profileCompletionAwarded publicId enrollmentNumber course semester" })
-      .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture profileCompletionAwarded" });
+      .populate(postPopulateOptions);
     
     req.io?.emit("postCreated", populated);
 

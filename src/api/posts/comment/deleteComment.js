@@ -69,11 +69,11 @@ const deleteComment = async (req, res) => {
       console.error("❌ Failed to revoke points for comment deletion:", revokeErr.message);
     }
 
+    const postPopulateOptions = require("../utils/populatePost");
+
     // ✅ Re-fetch post to populate user details before socket emit
     const updated = await Post.findById(post._id)
-      .populate("user", "name profilePicture profileCompletionAwarded")
-      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" })
+      .populate(postPopulateOptions)
       .lean();
 
     req.io.emit("postUpdated", updated); // send to all sockets

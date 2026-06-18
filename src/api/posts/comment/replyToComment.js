@@ -24,10 +24,10 @@ const replyToComment = async (req, res) => {
 
     await post.save();
 
+    const postPopulateOptions = require("../utils/populatePost");
+
     const updated = await Post.findById(postId)
-      .populate("user", "name profilePicture profileCompletionAwarded")
-      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" });
+      .populate(postPopulateOptions);
 
     req.io.emit("postUpdated", updated);
 

@@ -31,17 +31,10 @@ module.exports = async (req, res) => {
 
     await post.save();
 
+    const postPopulateOptions = require("../utils/populatePost");
+
     const updatedPost = await Post.findById(post._id)
-      .populate({ path: "user", select: "name profilePicture profileCompletionAwarded" })
-      .populate({
-        path: "comments",
-        populate: [
-          { path: "user", select: "name profilePicture profileCompletionAwarded" },
-          { path: "replies.user", select: "name profilePicture profileCompletionAwarded" },
-        ],
-      })
-      .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture profileCompletionAwarded publicId" })
-      .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture profileCompletionAwarded" });
+      .populate(postPopulateOptions);
 
     const plainPost = updatedPost.toJSON();
 

@@ -82,6 +82,9 @@ const postSchema = new mongoose.Schema({
         groupId: String,
         groupName: String,
         groupMembers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+        enrollmentNumber: String,
+        course: String,
+        semester: String,
       }
     ],
     pointsRequested: { type: Boolean, default: false },

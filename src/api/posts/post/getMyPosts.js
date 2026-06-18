@@ -5,16 +5,14 @@ const getMyPosts = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
 
+    const postPopulateOptions = require("../utils/populatePost");
+
     // Filter by the logged-in user
     const posts = await Post.find({ user: req.user._id })
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate("user", "name profilePicture profileCompletionAwarded")
-      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" })
-      .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture profileCompletionAwarded publicId" })
-      .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture profileCompletionAwarded" });
+      .populate(postPopulateOptions);
 
     const total = await Post.countDocuments({ user: req.user._id });
 

@@ -120,15 +120,10 @@ const reactToReply = async (req, res) => {
       }
     }
 
+    const postPopulateOptions = require("../utils/populatePost");
+
     const updatedPost = await Post.findById(postId)
-      .populate("user", "name profilePicture profileCompletionAwarded")
-      .populate({
-        path: "comments",
-        populate: [
-          { path: "user", select: "name profilePicture profileCompletionAwarded" },
-          { path: "replies.user", select: "name profilePicture profileCompletionAwarded" },
-        ],
-      });
+      .populate(postPopulateOptions);
 
     // Emit updated post and reply reaction info via socket
     req.io.emit("postUpdated", updatedPost);

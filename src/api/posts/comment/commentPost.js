@@ -17,11 +17,11 @@ const commentPost = async (req, res) => {
     post.comments.push(comment);
     await post.save();
 
+    const postPopulateOptions = require("../utils/populatePost");
+
     // Repopulate with full user details
     const updatedPost = await Post.findById(postId)
-      .populate("user", "name profilePicture profileCompletionAwarded")
-      .populate("comments.user", "name profilePicture profileCompletionAwarded")
-      .populate("comments.replies.user", "name profilePicture profileCompletionAwarded");
+      .populate(postPopulateOptions);
 
     // Emit socket update
     req.io.emit("postUpdated", updatedPost);

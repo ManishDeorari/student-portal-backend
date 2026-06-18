@@ -115,16 +115,11 @@ const reactToComment = async (req, res) => {
 
     console.log("🔄 Fetching updated post...");
 
+    const postPopulateOptions = require("../utils/populatePost");
+
     // ✅ Fetch fully updated post with comment + reply users
     const updatedPost = await Post.findById(postId)
-      .populate("user", "name profilePicture profileCompletionAwarded")
-      .populate({
-        path: "comments",
-        populate: [
-          { path: "user", select: "name profilePicture profileCompletionAwarded" },
-          { path: "replies.user", select: "name profilePicture profileCompletionAwarded" },
-        ],
-      });
+      .populate(postPopulateOptions);
 
     const postObj = updatedPost.toObject();
 

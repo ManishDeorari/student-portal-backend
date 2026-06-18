@@ -37,11 +37,11 @@ const pinComment = async (req, res) => {
 
     await post.save();
 
+    const postPopulateOptions = require("../utils/populatePost");
+
     // Repopulate post details for socket sync & response
     const updatedPost = await Post.findById(postId)
-      .populate("user", "name profilePicture profileCompletionAwarded")
-      .populate("comments.user", "name profilePicture profileCompletionAwarded")
-      .populate("comments.replies.user", "name profilePicture profileCompletionAwarded");
+      .populate(postPopulateOptions);
 
     // Emit live socket update
     if (req.io) {

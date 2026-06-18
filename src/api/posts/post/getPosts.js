@@ -17,14 +17,9 @@ const getPosts = async (req, res) => {
       filter.$and = [{ $or: [{ publishAt: { $lte: now } }, { publishAt: { $exists: false } }, { publishAt: null }] }];
 
       
+      const postPopulateOptions = require("../utils/populatePost");
       const posts = await Post.find(filter)
-        .populate("user", "name profilePicture profileCompletionAwarded points.total")
-        .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded points.total" })
-        .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded points.total" })
-        .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture profileCompletionAwarded publicId enrollmentNumber course semester" })
-        .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture profileCompletionAwarded" })
-        .populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture profileCompletionAwarded publicId points.total" } })
-        .populate({ path: "announcementDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture profileCompletionAwarded publicId points.total" } });
+        .populate(postPopulateOptions);
         
       let eventFilter = userId ? { createdBy: userId } : {};
       const events = await Event.find(eventFilter)
@@ -105,14 +100,9 @@ const getPosts = async (req, res) => {
 
     if (userId) filter.user = userId;
 
+    const postPopulateOptions = require("../utils/populatePost");
     const posts = await Post.find(filter)
-      .populate("user", "name profilePicture profileCompletionAwarded points.total")
-      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded points.total" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded points.total" })
-      .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture profileCompletionAwarded publicId enrollmentNumber course semester" })
-      .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture profileCompletionAwarded" })
-      .populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture profileCompletionAwarded publicId points.total" } })
-      .populate({ path: "announcementDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture profileCompletionAwarded publicId points.total" } });
+      .populate(postPopulateOptions);
 
     let sortedPosts = posts;
     if (req.query.sort === "trending") {
