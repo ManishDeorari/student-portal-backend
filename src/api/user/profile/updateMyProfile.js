@@ -132,6 +132,7 @@ module.exports = async (req, res) => {
         updatedUser.points.profileCompletion = (updatedUser.points.profileCompletion || 0) + awardAmount;
 
         updatedUser.profileCompletionAwarded = true;
+        updatedUser.markModified('points');
         await updatedUser.save();
 
         // ✅ Notification for points
@@ -169,6 +170,7 @@ module.exports = async (req, res) => {
         updatedUser.points.profileCompletion = Math.max(0, (updatedUser.points.profileCompletion || 0) - awardAmount);
 
         updatedUser.profileCompletionAwarded = false;
+        updatedUser.markModified('points');
         await updatedUser.save();
 
         try {
