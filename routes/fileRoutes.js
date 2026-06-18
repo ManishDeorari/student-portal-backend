@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const auth = require("../middleware/authMiddleware");
 const https = require("https");
-const cloudinary = require("../../config/cloudinary");
 
 // @route   GET /api/files/proxy
 // @desc    Proxy Cloudinary file downloads securely
@@ -43,17 +42,20 @@ router.get("/proxy", auth, async (req, res) => {
     // Support inline viewing (for images and videos)
     const isInline = req.query.inline === 'true';
     if (isInline) {
-      // 🚀 REDIRECT METHOD: Way faster, zero backend load, browser downloads from CDN directly.
-      // We generate a "temporary" signed link (or use raw if signing not configured).
-      return res.redirect(302, fileUrl);
+      res.setHeader("Content-Disposition", "inline");
+      // Add basic caching headers for performance
+      res.setHeader("Cache-Control", "public, max-age=86400, immutable");
+      // Allow rendering across origins
+      res.setHeader("Cross-Origin-Resource-Policy", "cross-origin");
+      res.setHeader("Access-Control-Allow-Origin", "*");
     } else {
       const filename = req.query.name ? encodeURIComponent(req.query.name) : "document";
       res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
-      
-      // For downloads, we still pipe to hide the URL and force the attachment header
-      const { Readable } = require('stream');
-      Readable.fromWeb(response.body).pipe(res);
     }
+    
+    // Pipe response body to express response
+    const { Readable } = require('stream');
+    Readable.fromWeb(response.body).pipe(res);
 
   } catch (error) {
     console.error("Proxy Error:", error);
