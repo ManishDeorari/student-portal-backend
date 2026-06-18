@@ -92,7 +92,7 @@ module.exports = async (req, res) => {
 
       const hasProfilePic = updatedUser.profilePicture && !updatedUser.profilePicture.includes("default-profile.jpg");
       const hasBanner = updatedUser.bannerImage && !updatedUser.bannerImage.includes("default_banner.jpg");
-      const hasPhone = updatedUser.phone && updatedUser.phone !== "Not provided";
+      const hasPhone = updatedUser.phone && updatedUser.phone !== "Not provided" && updatedUser.phone.replace(/\D/g, "").length >= 7;
       const hasAddress = updatedUser.address && updatedUser.address !== "Not set";
       const hasWhatsApp = updatedUser.whatsapp && updatedUser.whatsapp !== "Not linked";
       const hasLinkedIn = updatedUser.linkedin && updatedUser.linkedin !== "Not linked";
