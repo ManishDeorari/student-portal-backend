@@ -1,5 +1,6 @@
 // controllers/user/getMyPosts.js
 const Post = require("../../../../models/Post");
+const postPopulateOptions = require("../../posts/utils/populatePost");
 
 const getMyPosts = async (req, res) => {
   try {
@@ -7,9 +8,7 @@ const getMyPosts = async (req, res) => {
 
     const posts = await Post.find({ user: userId })
       .sort({ createdAt: -1 }) // newest → oldest
-      .populate("user", "name profilePicture profileCompletionAwarded")
-      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" });
+      .populate(postPopulateOptions);
 
     res.json(posts);
   } catch (err) {
