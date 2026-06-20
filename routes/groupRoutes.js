@@ -126,7 +126,7 @@ router.get("/", checkAuth, async (req, res) => {
 router.get("/:groupId", checkAuth, async (req, res) => {
     try {
         const group = await Group.findById(req.params.groupId)
-            .populate("members", "name profilePicture role enrollmentNumber employeeId isMainAdmin")
+            .populate("members", "name profilePicture role enrollmentNumber employeeId isMainAdmin profileCompletionAwarded publicId")
             .populate("admin", "name profilePicture isMainAdmin");
         
         if (!group) return res.status(404).json({ message: "Group not found" });
@@ -281,7 +281,7 @@ router.put("/:groupId/settings", checkAuth, checkAdmin, async (req, res) => {
         }
 
         const updatedGroup = await Group.findById(req.params.groupId)
-            .populate("members", "name profilePicture role enrollmentNumber employeeId isMainAdmin")
+            .populate("members", "name profilePicture role enrollmentNumber employeeId isMainAdmin profileCompletionAwarded publicId")
             .populate("admin", "name profilePicture isMainAdmin");
 
         res.json(updatedGroup);
@@ -359,7 +359,7 @@ router.post("/:groupId/invite", checkAuth, checkAdmin, async (req, res) => {
         });
 
         const updatedGroup = await Group.findById(req.params.groupId)
-            .populate("members", "name profilePicture role enrollmentNumber employeeId isMainAdmin")
+            .populate("members", "name profilePicture role enrollmentNumber employeeId isMainAdmin profileCompletionAwarded publicId")
             .populate("admin", "name profilePicture isMainAdmin");
 
         res.json({ message: "Members added successfully", group: updatedGroup });
@@ -405,7 +405,7 @@ router.delete("/:groupId/members/:memberId", checkAuth, checkAdmin, async (req, 
         });
 
         const updatedGroup = await Group.findById(groupId)
-            .populate("members", "name profilePicture role enrollmentNumber employeeId isMainAdmin")
+            .populate("members", "name profilePicture role enrollmentNumber employeeId isMainAdmin profileCompletionAwarded publicId")
             .populate("admin", "name profilePicture isMainAdmin");
 
         res.json({ message: "Member removed", group: updatedGroup });
@@ -525,7 +525,7 @@ router.delete("/:groupId/image", checkAuth, checkAdmin, async (req, res) => {
         await group.save();
 
         const updatedGroup = await Group.findById(req.params.groupId)
-            .populate("members", "name profilePicture role enrollmentNumber employeeId isMainAdmin")
+            .populate("members", "name profilePicture role enrollmentNumber employeeId isMainAdmin profileCompletionAwarded publicId")
             .populate("admin", "name profilePicture isMainAdmin");
 
         res.json({ message: "Group image removed", group: updatedGroup });
@@ -663,7 +663,7 @@ router.post("/:groupId/remove-role", checkAuth, checkAdmin, async (req, res) => 
         await group.save();
 
         const updatedGroup = await Group.findById(req.params.groupId)
-            .populate("members", "name profilePicture role enrollmentNumber employeeId isMainAdmin")
+            .populate("members", "name profilePicture role enrollmentNumber employeeId isMainAdmin profileCompletionAwarded publicId")
             .populate("admin", "name profilePicture isMainAdmin");
 
         res.json(updatedGroup);
