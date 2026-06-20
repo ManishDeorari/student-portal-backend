@@ -65,6 +65,30 @@ const deleteReply = async (req, res) => {
 
         await replyAuthor.save();
         console.log(`✅ Revoked ${replyPoints} points from user ${replyAuthor.name} for reply deletion.`);
+
+        // ✅ Silent Notification for points deduction
+        try {
+          const Notification = require("../../../../models/Notification");
+          const newNotification = new Notification({
+            sender: replyAuthor._id,
+            receiver: replyAuthor._id,
+            type: "silent_points_deducted",
+            message: `You lost ${replyPoints} points due to reply deletion.`,
+          });
+          await newNotification.save();
+
+          if (req.io) {
+            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
+            req.io.to(replyAuthor._id.toString()).emit("newNotification", populatedNotification);
+            req.io.to(replyAuthor._id.toString()).emit("pointsUpdated", {
+              awardedPoints: -replyPoints,
+              reason: "Reply Deletion",
+              totalPoints: replyAuthor.points.total
+            });
+          }
+        } catch (noteErr) {
+          console.error("❌ Failed to send points deduction notice:", noteErr.message);
+        }
       }
     } catch (revokeErr) {
       console.error("❌ Failed to revoke points for reply deletion:", revokeErr.message);

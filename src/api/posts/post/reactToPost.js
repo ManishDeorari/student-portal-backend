@@ -118,6 +118,31 @@ module.exports = async (req, res) => {
 
           await user.save();
           console.log(`✅ Revoked ${pts} points from user ${user.name} for removing reaction.`);
+
+          // ✅ Silent Notification for points deduction
+          try {
+            const Notification = require("../../../../models/Notification");
+            const newNotification = new Notification({
+              sender: user._id,
+              receiver: user._id,
+              type: "silent_points_deducted",
+              message: `You lost ${pts} points due to reaction removal.`,
+            });
+            await newNotification.save();
+
+            if (req.io) {
+              const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
+              const targetRoom = user._id.toString();
+              req.io.to(targetRoom).emit("newNotification", populatedNotification);
+              req.io.to(targetRoom).emit("pointsUpdated", {
+                awardedPoints: -pts,
+                reason: "Reaction Removal",
+                totalPoints: user.points.total
+              });
+            }
+          } catch (noteErr) {
+            console.error("❌ Failed to send points deduction notice:", noteErr.message);
+          }
         }
       } catch (revokeErr) {
         console.error("❌ Failed to revoke points for reaction removal:", revokeErr.message);

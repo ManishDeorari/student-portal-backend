@@ -25,6 +25,7 @@ const NotificationSchema = new mongoose.Schema({
       "group_disbanded",
       "points_earned",
       "points_deducted",
+      "silent_points_deducted",
       "feedback",
       "promotion",
       "demotion",

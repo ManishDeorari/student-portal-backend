@@ -64,6 +64,30 @@ const deleteComment = async (req, res) => {
 
         await commentAuthor.save();
         console.log(`✅ Revoked ${config.commentPoints} points from user ${commentAuthor.name} for comment deletion.`);
+
+        // ✅ Silent Notification for points deduction
+        try {
+          const Notification = require("../../../../models/Notification");
+          const newNotification = new Notification({
+            sender: commentAuthor._id,
+            receiver: commentAuthor._id,
+            type: "silent_points_deducted",
+            message: `You lost ${config.commentPoints} points due to comment deletion.`,
+          });
+          await newNotification.save();
+
+          if (req.io) {
+            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
+            req.io.to(commentAuthor._id.toString()).emit("newNotification", populatedNotification);
+            req.io.to(commentAuthor._id.toString()).emit("pointsUpdated", {
+              awardedPoints: -config.commentPoints,
+              reason: "Comment Deletion",
+              totalPoints: commentAuthor.points.total
+            });
+          }
+        } catch (noteErr) {
+          console.error("❌ Failed to send points deduction notice:", noteErr.message);
+        }
       }
     } catch (revokeErr) {
       console.error("❌ Failed to revoke points for comment deletion:", revokeErr.message);

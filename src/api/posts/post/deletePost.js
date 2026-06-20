@@ -120,6 +120,30 @@ const deletePost = async (req, res) => {
 
         await postAuthor.save();
         console.log(`✅ Revoked ${config.postPoints} points from user ${postAuthor.name} for post deletion.`);
+
+        // ✅ Silent Notification for points deduction
+        try {
+          const Notification = require("../../../../models/Notification");
+          const newNotification = new Notification({
+            sender: postAuthor._id,
+            receiver: postAuthor._id,
+            type: "silent_points_deducted",
+            message: `You lost ${config.postPoints} points due to post deletion.`,
+          });
+          await newNotification.save();
+
+          if (req.io) {
+            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
+            req.io.to(postAuthor._id.toString()).emit("newNotification", populatedNotification);
+            req.io.to(postAuthor._id.toString()).emit("pointsUpdated", {
+              awardedPoints: -config.postPoints,
+              reason: "Post Deletion",
+              totalPoints: postAuthor.points.total
+            });
+          }
+        } catch (noteErr) {
+          console.error("❌ Failed to send points deduction notice:", noteErr.message);
+        }
       }
     } catch (revokeErr) {
       console.error("❌ Failed to revoke points:", revokeErr.message);
