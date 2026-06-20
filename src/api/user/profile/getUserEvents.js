@@ -41,8 +41,14 @@ const getUserEvents = async (req, res) => {
     const repostedEvents = reposts
       .map(p => {
         if (!p.eventRepostDetails?.originalEventId) return null;
-        const ev = p.eventRepostDetails.originalEventId.toObject ? p.eventRepostDetails.originalEventId.toObject() : p.eventRepostDetails.originalEventId;
-        return { ...ev, participationType: "Event Repost" };
+        return {
+          ...p.toObject(),
+          isEventRepostPost: true,
+          participationType: "Event Repost",
+          title: p.eventRepostDetails?.eventName || p.eventRepostDetails?.originalEventId?.title,
+          startDate: p.eventRepostDetails?.date || p.eventRepostDetails?.originalEventId?.startDate,
+          startTime: p.eventRepostDetails?.time || p.eventRepostDetails?.originalEventId?.startTime,
+        };
       })
       .filter(e => e);
 
