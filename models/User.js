@@ -91,7 +91,7 @@ const UserSchema = new mongoose.Schema(
     bannerImage: String,
     secondaryEmail: String,
     universityRollNumber: String,
-    domain: String,
+    branch: String,
 
     // Detailed Profile Fields
     phone: String,

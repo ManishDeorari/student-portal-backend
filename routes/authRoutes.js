@@ -12,7 +12,7 @@ const enrollmentNumberRegex = /^PV-H\d+$/;
 // ======================== SIGNUP ==========================
 router.post("/signup", async (req, res) => {
   try {
-    const { name, email, password, enrollmentNumber, employeeId, role, position, department, course, semester, section, domain } = req.body;
+    const { name, email, password, enrollmentNumber, employeeId, role, position, department, course, semester, section, branch } = req.body;
 
     // Validation
     if (!name || !email || !password || !role) {
@@ -114,7 +114,7 @@ router.post("/signup", async (req, res) => {
       course: role === "student" ? course : undefined,
       semester: role === "student" ? semester : undefined,
       section: role === "student" ? section : undefined,
-      domain: role === "student" ? domain : undefined,
+      branch: role === "student" ? branch : undefined,
       isAdmin: false,
       approved: false,
     });
