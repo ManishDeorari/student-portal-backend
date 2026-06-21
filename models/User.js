@@ -133,7 +133,7 @@ const UserSchema = new mongoose.Schema(
     sentRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 
     // Activity Heatmap
-    activityHeatmap: { type: Map, of: Number, default: {} },
+    activityHeatmap: { type: Object, default: {} },
 
     // Role & Permission
     role: {

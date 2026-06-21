@@ -1,31 +1,29 @@
 const User = require('../models/User');
 
-/**
- * Increments the user's activity count for today.
- * Extremely lightweight DB operation.
- * @param {String} userId - The ID of the user.
- */
 const recordActivity = async (userId) => {
     try {
         if (!userId) return;
-        
-        // Format date to YYYY-MM-DD in local time
         const date = new Date();
         const dateString = date.toISOString().split('T')[0];
 
         const user = await User.findById(userId);
         if (!user) return;
 
-        // Initialize map if it doesn't exist
+        // Initialize object if it doesn't exist
         if (!user.activityHeatmap) {
-            user.activityHeatmap = new Map();
+            user.activityHeatmap = {};
         }
 
-        // Get current count
-        const currentCount = user.activityHeatmap.get(dateString) || 0;
-        user.activityHeatmap.set(dateString, currentCount + 1);
+        // We use plain object syntax now since it's type: Object
+        let heatmapObj = user.activityHeatmap instanceof Map 
+            ? Object.fromEntries(user.activityHeatmap) 
+            : user.activityHeatmap;
 
-        // Force mongoose to recognize the change in the Map
+        const currentCount = heatmapObj[dateString] || 0;
+        heatmapObj[dateString] = currentCount + 1;
+
+        // Save it back and force Mongoose to recognize change
+        user.activityHeatmap = heatmapObj;
         user.markModified('activityHeatmap');
         
         await user.save();
