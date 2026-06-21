@@ -4,6 +4,7 @@ const auth = require("../middleware/authMiddleware");
 const {
   getMyProfile,
   updateMyProfile,
+  endorseSkill,
   getAllUsers,
   getConnectedUsers,
   sendConnectionRequest,
@@ -23,6 +24,7 @@ const {
 // ------- PROFILE ROUTES -------
 router.get("/me", auth, getMyProfile);
 router.put("/update", auth, updateMyProfile);
+router.post("/skills/endorse/:id", auth, endorseSkill);
 router.get("/myposts", auth, getMyPosts);
 router.post("/points-request", auth, profilePointsRequest);
 // ------- CONNECTION ROUTES -------

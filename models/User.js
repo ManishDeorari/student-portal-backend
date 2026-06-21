@@ -63,6 +63,11 @@ const EducationSchema = new mongoose.Schema({
   description: { type: String, maxlength: 1000 },
 });
 
+const SkillSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  endorsements: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
+});
+
 // ===================== Main User Schema =====================
 const UserSchema = new mongoose.Schema(
   {
@@ -103,7 +108,8 @@ const UserSchema = new mongoose.Schema(
 
     education: [EducationSchema],
     experience: [ExperienceSchema],
-    skills: [String],
+    skills: [String], // Legacy skills array
+    profileSkills: [SkillSchema], // New skills array with endorsements
 
     // Resume and Links
     resume: String,
@@ -146,6 +152,7 @@ const UserSchema = new mongoose.Schema(
     likePointLogs: [{ type: Date }], // Dates when like points were awarded
     commentPointLogs: [{ type: Date }], // Dates when comment points were awarded
     profileCompletionAwarded: { type: Boolean, default: false },
+    pointsAwardedForSkills: { type: Number, default: 0 }, // Tracks points given for skills
     eventPointsAwarded: [{ type: mongoose.Schema.Types.ObjectId, ref: "Event" }],
     lastLoginPointAwardedAt: { type: Date }, // Tracking for daily login points
 
