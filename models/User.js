@@ -132,6 +132,9 @@ const UserSchema = new mongoose.Schema(
     pendingRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     sentRequests: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 
+    // Activity Heatmap
+    activityHeatmap: { type: Map, of: Number, default: {} },
+
     // Role & Permission
     role: {
       type: String,

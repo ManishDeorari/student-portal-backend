@@ -1,3 +1,4 @@
+const { recordActivity } = require('../utils/activityTracker');
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -211,9 +212,12 @@ router.post("/login", async (req, res) => {
       { expiresIn: "2h" }
     );
 
-    res.json({
-      message: "Login successful",
-      token,
+    // Record login activity
+      await recordActivity(user._id);
+
+      res.json({
+        message: "Login successful",
+        token,
       user: {
         id: user._id,
         name: user.name,
