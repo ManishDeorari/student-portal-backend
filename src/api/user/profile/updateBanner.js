@@ -3,7 +3,7 @@ const cloudinary = require("../../../../config/cloudinary");
 
 module.exports = async (req, res) => {
   try {
-    const { oldImageUrl, bannerImage, ...rest } = req.body;
+    const { oldImageUrl, bannerImage, bannerImageFocus, ...rest } = req.body;
 
     // 🧹 Delete old Cloudinary image if present & not default
     if (
@@ -27,6 +27,9 @@ module.exports = async (req, res) => {
       ...rest,
       bannerImage: bannerImage,
     };
+    if (bannerImageFocus !== undefined) {
+      updates.bannerImageFocus = bannerImageFocus;
+    }
 
     const updatedUser = await User.findByIdAndUpdate(req.user.id, updates, {
       new: true,

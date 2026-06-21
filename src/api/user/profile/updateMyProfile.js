@@ -4,7 +4,7 @@ const cloudinary = require("../../../../config/cloudinary");
 
 module.exports = async (req, res) => {
   try {
-    const { oldImageUrl, profileImage, ...rest } = req.body;
+    const { oldImageUrl, profileImage, profileImageFocus, ...rest } = req.body;
 
     // 🧹 Delete old Cloudinary image if present & not default
     if (
@@ -48,6 +48,9 @@ module.exports = async (req, res) => {
 
     if (profileImage) {
       updates.profilePicture = profileImage;
+    }
+    if (profileImageFocus !== undefined) {
+      updates.profileImageFocus = profileImageFocus;
     }
 
     // ✅ Format education entries
