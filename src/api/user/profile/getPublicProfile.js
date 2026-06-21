@@ -94,9 +94,35 @@ module.exports = async (req, res) => {
       await sendVisitNotification(req, visitorId, targetUserId);
     }
 
-    // ✅ Return the complete user object (already excluded password in select)
-    // We can return the whole object now since we fixed the profile fetch earlier
-    res.json(user);
+    // Convert to plain object to modify safely
+    const userData = user.toObject();
+
+    // Privacy filter: Hide sensitive fields if viewer is a student or unauthenticated
+    if (!visitorId || (visitorId.toString() !== targetUserId.toString() && req.user?.role === "student")) {
+      delete userData.phone;
+      delete userData.whatsapp;
+      delete userData.address;
+    }
+
+    // Mutual connections calculation
+    if (visitorId && visitorId.toString() !== targetUserId.toString() && req.user && req.user.connections) {
+      const visitorConnections = req.user.connections.map(c => c.toString());
+      const targetConnections = userData.connections ? userData.connections.map(c => c.toString()) : [];
+      const mutualIds = visitorConnections.filter(id => targetConnections.includes(id));
+      
+      if (mutualIds.length > 0) {
+        // Fetch details of mutual connections
+        const mutualUsers = await User.find({ _id: { $in: mutualIds } })
+          .select("_id name profilePicture");
+        userData.mutualConnections = mutualUsers;
+      } else {
+        userData.mutualConnections = [];
+      }
+    } else {
+      userData.mutualConnections = [];
+    }
+
+    res.json(userData);
   } catch (err) {
     console.error("❌ Error fetching public profile:", err.message);
     res.status(500).json({ message: "Server error" });
