@@ -68,6 +68,12 @@ const SkillSchema = new mongoose.Schema({
   endorsements: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
 });
 
+const FeaturedSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  url: { type: String, required: true },
+  type: { type: String, enum: ['github', 'youtube', 'portfolio', 'post', 'other'], default: 'other' }
+});
+
 // ===================== Main User Schema =====================
 const UserSchema = new mongoose.Schema(
   {
@@ -110,6 +116,7 @@ const UserSchema = new mongoose.Schema(
     experience: [ExperienceSchema],
     skills: [String], // Legacy skills array
     profileSkills: [SkillSchema], // New skills array with endorsements
+    featured: [FeaturedSchema], // Featured/pinned links
 
     // Resume and Links
     resume: String,
