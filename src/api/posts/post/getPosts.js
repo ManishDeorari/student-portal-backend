@@ -23,9 +23,9 @@ const getPosts = async (req, res) => {
         
       let eventFilter = userId ? { createdBy: userId } : {};
       const events = await Event.find(eventFilter)
-        .populate("createdBy", "name profilePicture profileCompletionAwarded points.total")
-        .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded points.total" })
-        .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded points.total" });
+        .populate("createdBy", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded points.total")
+        .populate({ path: "comments.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded points.total" })
+        .populate({ path: "comments.replies.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded points.total" });
         
       const mappedEvents = await Promise.all(events.map(async (e) => {
         const regCount = await Registration.countDocuments({ eventId: e._id });

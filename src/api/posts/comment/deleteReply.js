@@ -33,7 +33,7 @@ const deleteReply = async (req, res) => {
         });
         await adminNote.save();
         if (req.io) {
-          const populatedNotification = await Notification.findById(adminNote._id).populate("sender", "name profilePicture profileCompletionAwarded");
+          const populatedNotification = await Notification.findById(adminNote._id).populate("sender", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded");
           const targetRoom = reply.user.toString();
           req.io.to(targetRoom).emit("newNotification", populatedNotification);
           req.io.to(targetRoom).emit("liveNotification", populatedNotification);
@@ -78,7 +78,7 @@ const deleteReply = async (req, res) => {
           await newNotification.save();
 
           if (req.io) {
-            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
+            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded");
             req.io.to(replyAuthor._id.toString()).emit("newNotification", populatedNotification);
             req.io.to(replyAuthor._id.toString()).emit("pointsUpdated", {
               awardedPoints: -replyPoints,

@@ -10,7 +10,7 @@ const getRegistrations = async (req, res) => {
     }
 
     const registrations = await Registration.find({ eventId })
-      .populate("userId", "name email profilePicture enrollmentNumber")
+      .populate("userId", "name email profilePicture profileImageFocus bannerImageFocus enrollmentNumber")
       .sort({ createdAt: 1 });
 
     const totalCount = registrations.length;

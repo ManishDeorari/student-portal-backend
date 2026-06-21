@@ -527,7 +527,7 @@ router.get("/leaderboard", authenticate, verifyAdmin, async (req, res) => {
     const topUsers = await User.find({ approved: true, role: "student", "points.total": { $gt: 0 } })
       .sort({ "points.total": -1 })
       .limit(50)
-      .select("name email role points profilePicture course semester section");
+      .select("name email role points profilePicture profileImageFocus bannerImageFocus course semester section");
     res.json(topUsers);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch leaderboard" });
@@ -556,7 +556,7 @@ router.get("/leaderboard/last-year", authenticate, verifyAdmin, async (req, res)
     })
       .sort({ "lastYearPoints.total": -1 })
       .limit(50)
-      .select("name email profilePicture lastYearPoints course semester section");
+      .select("name email profilePicture profileImageFocus bannerImageFocus lastYearPoints course semester section");
 
     res.json(users);
   } catch (error) {
@@ -745,7 +745,7 @@ router.put("/update-user/:id", authenticate, verifyAdmin, verifyMainAdmin, async
       });
       await newNotif.save();
 
-      const populatedNotif = await Notification.findById(newNotif._id).populate("sender", "name profilePicture");
+      const populatedNotif = await Notification.findById(newNotif._id).populate("sender", "name profilePicture profileImageFocus bannerImageFocus");
 
       req.io.to(user._id.toString()).emit("newNotification", populatedNotif);
       req.io.to(user._id.toString()).emit("liveNotification", populatedNotif);

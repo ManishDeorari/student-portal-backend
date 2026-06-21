@@ -56,9 +56,9 @@ const reactToEvent = async (req, res) => {
     await event.save();
 
     const updatedEvent = await Event.findById(id)
-      .populate("createdBy", "name profilePicture profileCompletionAwarded")
-      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" });
+      .populate("createdBy", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded")
+      .populate({ path: "comments.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" });
 
     const eventResp = await getEventMetadata(updatedEvent, req.user?._id);
     const broadcastEvent = { ...eventResp, isRegistered: undefined, myRegistration: undefined };
@@ -91,9 +91,9 @@ const commentOnEvent = async (req, res) => {
     await event.save();
 
     const updatedEvent = await Event.findById(id)
-      .populate("createdBy", "name profilePicture profileCompletionAwarded")
-      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" });
+      .populate("createdBy", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded")
+      .populate({ path: "comments.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" });
 
     const eventResp = await getEventMetadata(updatedEvent, req.user?._id);
     const broadcastEvent = { ...eventResp, isRegistered: undefined, myRegistration: undefined };
@@ -127,9 +127,9 @@ const editEvent = async (req, res) => {
     await event.save();
 
     const updatedEvent = await Event.findById(id)
-      .populate("createdBy", "name profilePicture profileCompletionAwarded")
-      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" });
+      .populate("createdBy", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded")
+      .populate({ path: "comments.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" });
 
     const eventResp = await getEventMetadata(updatedEvent, req.user?._id);
     const broadcastEvent = { ...eventResp, isRegistered: undefined, myRegistration: undefined };
@@ -155,9 +155,9 @@ const deleteCommentFromEvent = async (req, res) => {
     await event.save();
 
     const updatedEvent = await Event.findById(eventId)
-      .populate("createdBy", "name profilePicture profileCompletionAwarded")
-      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" });
+      .populate("createdBy", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded")
+      .populate({ path: "comments.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" });
 
     const eventResp = await getEventMetadata(updatedEvent, req.user?._id);
     const broadcastEvent = { ...eventResp, isRegistered: undefined, myRegistration: undefined };
@@ -182,9 +182,9 @@ const editCommentOnEvent = async (req, res) => {
     }
 
     const updatedEvent = await Event.findById(eventId)
-      .populate("createdBy", "name profilePicture profileCompletionAwarded")
-      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" });
+      .populate("createdBy", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded")
+      .populate({ path: "comments.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" });
 
     const eventResp = await getEventMetadata(updatedEvent, req.user?._id);
     const broadcastEvent = { ...eventResp, isRegistered: undefined, myRegistration: undefined };
@@ -215,9 +215,9 @@ const replyToCommentOnEvent = async (req, res) => {
     await event.save();
 
     const updatedEvent = await Event.findById(eventId)
-      .populate("createdBy", "name profilePicture profileCompletionAwarded")
-      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" });
+      .populate("createdBy", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded")
+      .populate({ path: "comments.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" });
 
     const eventResp = await getEventMetadata(updatedEvent, req.user?._id);
     const broadcastEvent = { ...eventResp, isRegistered: undefined, myRegistration: undefined };
@@ -260,9 +260,9 @@ const reactToCommentOnEvent = async (req, res) => {
     await event.save();
 
     const updatedEvent = await Event.findById(eventId)
-      .populate("createdBy", "name profilePicture profileCompletionAwarded")
-      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" });
+      .populate("createdBy", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded")
+      .populate({ path: "comments.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" });
 
     const eventResp = await getEventMetadata(updatedEvent, req.user?._id);
     const broadcastEvent = { ...eventResp, isRegistered: undefined, myRegistration: undefined };
@@ -290,9 +290,9 @@ const editReplyOnEvent = async (req, res) => {
     }
 
     const updatedEvent = await Event.findById(eventId)
-      .populate("createdBy", "name profilePicture profileCompletionAwarded")
-      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" });
+      .populate("createdBy", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded")
+      .populate({ path: "comments.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" });
 
     const eventResp = await getEventMetadata(updatedEvent, req.user?._id);
     const broadcastEvent = { ...eventResp, isRegistered: undefined, myRegistration: undefined };
@@ -316,9 +316,9 @@ const deleteReplyOnEvent = async (req, res) => {
     await event.save();
 
     const updatedEvent = await Event.findById(eventId)
-      .populate("createdBy", "name profilePicture profileCompletionAwarded")
-      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" });
+      .populate("createdBy", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded")
+      .populate({ path: "comments.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" });
 
     const eventResp = await getEventMetadata(updatedEvent, req.user?._id);
     const broadcastEvent = { ...eventResp, isRegistered: undefined, myRegistration: undefined };
@@ -364,9 +364,9 @@ const reactToReplyOnEvent = async (req, res) => {
     await event.save();
 
     const updatedEvent = await Event.findById(eventId)
-      .populate("createdBy", "name profilePicture profileCompletionAwarded")
-      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" });
+      .populate("createdBy", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded")
+      .populate({ path: "comments.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" });
 
     const eventResp = await getEventMetadata(updatedEvent, req.user?._id);
     const broadcastEvent = { ...eventResp, isRegistered: undefined, myRegistration: undefined };
@@ -410,9 +410,9 @@ const pinCommentOnEvent = async (req, res) => {
     await event.save();
 
     const updatedEvent = await Event.findById(eventId)
-      .populate("createdBy", "name profilePicture profileCompletionAwarded")
-      .populate({ path: "comments.user", select: "name profilePicture profileCompletionAwarded" })
-      .populate({ path: "comments.replies.user", select: "name profilePicture profileCompletionAwarded" });
+      .populate("createdBy", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded")
+      .populate({ path: "comments.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" })
+      .populate({ path: "comments.replies.user", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" });
 
     const eventResp = await getEventMetadata(updatedEvent, req.user?._id);
     const broadcastEvent = { ...eventResp, isRegistered: undefined, myRegistration: undefined };
@@ -442,7 +442,7 @@ const pinCommentOnEvent = async (req, res) => {
         await newNotification.save();
 
         if (req.io) {
-          const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
+          const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded");
           const targetRoom = comment.user.toString();
           req.io.to(targetRoom).emit("newNotification", populatedNotification);
           req.io.to(targetRoom).emit("liveNotification", populatedNotification);

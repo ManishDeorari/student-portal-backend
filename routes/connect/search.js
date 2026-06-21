@@ -64,7 +64,7 @@ router.get("/", authMiddleware, async (req, res) => {
     }
 
     const users = await User.find(filter)
-      .select("name email enrollmentNumber employeeId role course year profilePicture connections pendingRequests sentRequests workProfile skills")
+      .select("name email enrollmentNumber employeeId role course year profilePicture profileImageFocus bannerImageFocus connections pendingRequests sentRequests workProfile skills")
       .limit(50);
 
     // Convert current user's lists to string arrays safely

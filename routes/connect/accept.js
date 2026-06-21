@@ -64,12 +64,12 @@ router.post("/", authenticate, async (req, res) => {
     // Emit socket events
     if (req.io) {
       // Notify the requester
-      const populatedSenderNote = await Notification.findById(acceptNoteForSender._id).populate("sender", "name profilePicture");
+      const populatedSenderNote = await Notification.findById(acceptNoteForSender._id).populate("sender", "name profilePicture profileImageFocus bannerImageFocus");
       req.io.to(from.toString()).emit("newNotification", populatedSenderNote);
       req.io.to(from.toString()).emit("liveNotification", populatedSenderNote);
 
       // Notify the acceptor (live update for their own feed/preview)
-      const populatedReceiverNote = await Notification.findById(acceptNoteForReceiver._id).populate("sender", "name profilePicture");
+      const populatedReceiverNote = await Notification.findById(acceptNoteForReceiver._id).populate("sender", "name profilePicture profileImageFocus bannerImageFocus");
       req.io.to(to.toString()).emit("newNotification", populatedReceiverNote);
       req.io.to(to.toString()).emit("liveNotification", populatedReceiverNote);
     }
@@ -106,7 +106,7 @@ router.post("/", authenticate, async (req, res) => {
           await newNotification.save();
 
           if (req.io) {
-            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture");
+            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileImageFocus bannerImageFocus");
             const targetRoom = user._id.toString();
             req.io.to(targetRoom).emit("newNotification", populatedNotification);
             req.io.to(targetRoom).emit("liveNotification", populatedNotification);

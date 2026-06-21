@@ -24,7 +24,7 @@ const getUserEvents = async (req, res) => {
         { userId: targetUserId },
         { groupMembers: targetUserId }
       ]
-    }).populate({ path: "eventId", populate: { path: "createdBy", select: "name profilePicture profileCompletionAwarded publicId" } }).sort({ createdAt: -1 });
+    }).populate({ path: "eventId", populate: { path: "createdBy", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded publicId" } }).sort({ createdAt: -1 });
 
     const registeredEvents = registrations.map(reg => {
       if (!reg.eventId) return null;
@@ -36,7 +36,7 @@ const getUserEvents = async (req, res) => {
     const reposts = await Post.find({
       user: targetUserId,
       type: "EventRepost"
-    }).populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture profileCompletionAwarded publicId" } }).sort({ createdAt: -1 });
+    }).populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded publicId" } }).sort({ createdAt: -1 });
 
     const repostedEvents = reposts
       .map(p => {
@@ -73,10 +73,10 @@ const getUserEvents = async (req, res) => {
         { "announcementDetails.winners.groupMembers": targetUserId }
       ]
     })
-    .populate({ path: "announcementDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture profileCompletionAwarded publicId" } })
-    .populate("user", "name profilePicture profileCompletionAwarded publicId")
-    .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture profileCompletionAwarded publicId enrollmentNumber course semester" })
-    .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture profileCompletionAwarded publicId" })
+    .populate({ path: "announcementDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded publicId" } })
+    .populate("user", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded publicId")
+    .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded publicId enrollmentNumber course semester" })
+    .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded publicId" })
     .sort({ createdAt: -1 });
 
     res.json({

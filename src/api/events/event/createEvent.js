@@ -71,7 +71,7 @@ const createEvent = async (req, res) => {
     });
 
     await event.save();
-    const populated = await event.populate("createdBy", "name profilePicture profileCompletionAwarded");
+    const populated = await event.populate("createdBy", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded");
     
     const ev = populated.toObject();
     const eventResp = { ...ev, user: ev.createdBy, type: "Event", content: ev.description };

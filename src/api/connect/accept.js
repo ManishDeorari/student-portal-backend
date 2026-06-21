@@ -44,7 +44,7 @@ router.post("/accept", authMiddleware, async (req, res) => {
 
       if (req.io) {
         const populatedNotification = await Notification.findById(newNotification._id)
-          .populate("sender", "name profilePicture profileCompletionAwarded");
+          .populate("sender", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded");
         req.io.to(fromUserId.toString()).emit("newNotification", populatedNotification);
       }
   

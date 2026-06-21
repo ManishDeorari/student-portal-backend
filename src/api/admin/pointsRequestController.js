@@ -11,11 +11,11 @@ const getPendingPointsRequests = async (req, res) => {
         { type: "EventRepost", "eventRepostDetails.pointsRequested": true, "eventRepostDetails.pointsStatus": "pending" }
       ]
     })
-    .populate("user", "name profilePicture profileCompletionAwarded enrollmentNumber")
-    .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture profileCompletionAwarded publicId enrollmentNumber course semester" })
-    .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture profileCompletionAwarded" })
-    .populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture profileCompletionAwarded publicId" } })
-    .populate({ path: "announcementDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture profileCompletionAwarded publicId" } })
+    .populate("user", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded enrollmentNumber")
+    .populate({ path: "announcementDetails.winners.userId", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded publicId enrollmentNumber course semester" })
+    .populate({ path: "announcementDetails.winners.groupMembers", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded" })
+    .populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded publicId" } })
+    .populate({ path: "announcementDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded publicId" } })
     .sort({ createdAt: -1 });
 
     res.json(posts);
@@ -63,7 +63,7 @@ const approvePointsRequest = async (req, res) => {
       // Emit Live Update to the affected user
       if (req.io) {
         const senderInfo = { _id: req.user._id, name: req.user.name, profilePicture: req.user.profilePicture };
-        const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
+        const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded");
         req.io.to(post.user.toString()).emit("newNotification", { 
           ...populatedNotification.toObject(), 
           sender: senderInfo 
@@ -250,7 +250,7 @@ const getPendingProfilePointsRequests = async (req, res) => {
         { githubPointsStatus: "pending" },
         { portfolioPointsStatus: "pending" }
       ]
-    }).select("name profilePicture profileCompletionAwarded enrollmentNumber course semester resume github portfolio resumePointsStatus githubPointsStatus portfolioPointsStatus");
+    }).select("name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded enrollmentNumber course semester resume github portfolio resumePointsStatus githubPointsStatus portfolioPointsStatus");
 
     res.json(users);
   } catch (error) {
@@ -286,7 +286,7 @@ const approveProfilePointsRequest = async (req, res) => {
 
       if (req.io) {
         const senderInfo = { _id: req.user._id, name: req.user.name, profilePicture: req.user.profilePicture };
-        const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
+        const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded");
         req.io.to(user._id.toString()).emit("newNotification", { ...populatedNotification.toObject(), sender: senderInfo });
       }
 

@@ -22,7 +22,7 @@ router.get("/", auth, async (req, res) => {
         { enrollmentNumber: regex },
         { "profile.skills": regex }
       ]
-    }).select("name profilePicture role enrollmentNumber branch").limit(5);
+    }).select("name profilePicture profileImageFocus bannerImageFocus role enrollmentNumber branch").limit(5);
 
     // Search Posts
     const posts = await Post.find({
@@ -32,7 +32,7 @@ router.get("/", auth, async (req, res) => {
         { "announcementDetails.winners.name": regex }
       ]
     })
-    .populate("user", "name profilePicture")
+    .populate("user", "name profilePicture profileImageFocus bannerImageFocus")
     .limit(5);
 
     // Search Events
@@ -43,7 +43,7 @@ router.get("/", auth, async (req, res) => {
         { location: regex }
       ]
     })
-    .populate("createdBy", "name profilePicture")
+    .populate("createdBy", "name profilePicture profileImageFocus bannerImageFocus")
     .limit(5);
 
     res.json({

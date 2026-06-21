@@ -7,7 +7,7 @@ const User = require("../../models/User");
 router.get("/:id", authenticate, async (req, res) => {
     try {
         const user = await User.findById(req.params.id)
-            .populate("connections", "name profilePicture course year enrollmentNumber employeeId publicId workProfile")
+            .populate("connections", "name profilePicture profileImageFocus bannerImageFocus course year enrollmentNumber employeeId publicId workProfile")
             .select("connections name");
 
         if (!user) return res.status(404).json({ message: "User not found" });

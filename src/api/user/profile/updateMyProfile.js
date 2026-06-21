@@ -152,7 +152,7 @@ module.exports = async (req, res) => {
           await newNotification.save();
 
           if (req.io) {
-            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
+            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded");
             req.io.to(updatedUser._id.toString()).emit("newNotification", populatedNotification);
             // 🔄 Emit pointsUpdated so UI reflects it immediately
             req.io.to(updatedUser._id.toString()).emit("pointsUpdated", {
@@ -189,7 +189,7 @@ module.exports = async (req, res) => {
           await newNotification.save();
 
           if (req.io) {
-            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
+            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded");
             req.io.to(updatedUser._id.toString()).emit("newNotification", populatedNotification);
             
             // 🔄 Emit pointsUpdated so UI reflects it immediately

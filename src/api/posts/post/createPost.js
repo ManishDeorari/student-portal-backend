@@ -135,7 +135,7 @@ const createPost = async (req, res) => {
             await newNotification.save();
 
             if (req.io) {
-              const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileCompletionAwarded");
+              const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded");
               const targetRoom = user._id.toString();
               req.io.to(targetRoom).emit("newNotification", populatedNotification);
               req.io.to(targetRoom).emit("liveNotification", populatedNotification);

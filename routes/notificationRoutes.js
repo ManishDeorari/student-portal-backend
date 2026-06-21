@@ -29,7 +29,7 @@ router.post("/feedback", auth, async (req, res) => {
 
         // Populate sender info for real-time update
         const populatedNotification = await Notification.findById(newNotification._id)
-            .populate("sender", "name profilePicture");
+            .populate("sender", "name profilePicture profileImageFocus bannerImageFocus");
 
         // Real-time update via socket
         if (req.io) {
@@ -57,7 +57,7 @@ router.get("/", auth, async (req, res) => {
         });
 
         const notifications = await Notification.find({ receiver: req.user._id })
-            .populate("sender", "name profilePicture")
+            .populate("sender", "name profilePicture profileImageFocus bannerImageFocus")
             .sort({ createdAt: -1 })
             .limit(50);
         res.json(notifications);
