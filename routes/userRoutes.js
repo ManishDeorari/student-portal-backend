@@ -26,6 +26,7 @@ router.get("/me", auth, getMyProfile);
 router.put("/update", auth, updateMyProfile);
 router.post("/skills/endorse/:id", auth, endorseSkill);
 router.get("/myposts", auth, getMyPosts);
+router.get("/activity", auth, getMyActivity);
 router.post("/points-request", auth, profilePointsRequest);
 // ------- CONNECTION ROUTES -------
 router.get("/all", auth, getAllUsers);
