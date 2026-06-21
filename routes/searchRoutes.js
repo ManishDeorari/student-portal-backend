@@ -22,7 +22,7 @@ router.get("/", auth, async (req, res) => {
         { enrollmentNumber: regex },
         { "profile.skills": regex }
       ]
-    }).select("name profilePicture profileImageFocus bannerImageFocus role enrollmentNumber branch").limit(5);
+    }).select("name profilePicture profileImageFocus bannerImageFocus role enrollmentNumber branch course semester publicId employeeId department position").limit(5);
 
     // Search Posts
     const posts = await Post.find({

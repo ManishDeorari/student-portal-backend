@@ -536,13 +536,13 @@ router.get("/leaderboard", authenticate, verifyAdmin, async (req, res) => {
 
 // ✅ 7️⃣ Get all admins + faculty (for Manage Admins tab)
 router.get("/admins", authenticate, verifyAdmin, async (req, res) => {
-  try {
-    const users = await User.find({
-      role: { $in: ["faculty", "admin"] },
-      isMainAdmin: { $ne: true }, // ✅ exclude main admin
-    }).select("name email role isAdmin employeeId position department");
-    res.json(users);
-  } catch (err) {
+    try {
+      const users = await User.find({
+        role: { $in: ["faculty", "admin"] },
+        isMainAdmin: { $ne: true }, // 🚀 exclude main admin
+      }).select("name email role isAdmin employeeId position department profilePicture");
+      res.json(users);
+    } catch (err) {
     res.status(500).json({ message: "Failed to fetch admins" });
   }
 });
@@ -615,7 +615,7 @@ router.get("/export-student", authenticate, verifyAdmin, async (req, res) => {
     if (industry) filter["workProfile.industry"] = { $regex: new RegExp(industry, "i") };
 
     const users = await User.find(filter)
-      .select("publicId name email enrollmentNumber phone whatsapp linkedin address education experience workProfile jobPreferences course semester section year")
+      .select("publicId name email enrollmentNumber phone whatsapp linkedin address education experience workProfile jobPreferences course semester section year profilePicture")
       .sort({ name: 1 });
 
     res.json(users);
