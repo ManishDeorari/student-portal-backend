@@ -225,8 +225,8 @@ module.exports = async (req, res) => {
       if (pointsDifference !== 0) {
         if (!updatedUser.points) updatedUser.points = { total: 0 };
         
-        // Use studentEngagement or alumniParticipation based on role
-        const engagementField = updatedUser.role === "student" ? "studentEngagement" : "alumniParticipation";
+        // 👤 Shift all profile-related points to the Profile Completion category
+        const engagementField = "profileCompletion";
         
         updatedUser.points.total = Math.max(0, (updatedUser.points.total || 0) + pointsDifference);
         updatedUser.points[engagementField] = Math.max(0, (updatedUser.points[engagementField] || 0) + pointsDifference);
@@ -280,9 +280,8 @@ module.exports = async (req, res) => {
         linkReasons.push("Removing Resume Link");
       }
 
-      // 2. Links Check (LinkedIn, GitHub, Portfolio, CustomLinks)
-      const hasLinks = (updatedUser.linkedin && updatedUser.linkedin !== "Not linked") || 
-                       (updatedUser.github && updatedUser.github.trim().length > 0) ||
+      // 2. Links Check (GitHub, Portfolio, CustomLinks) - Excluded LinkedIn as it's part of basic profile info
+      const hasLinks = (updatedUser.github && updatedUser.github.trim().length > 0) ||
                        (updatedUser.portfolio && updatedUser.portfolio.trim().length > 0) ||
                        (updatedUser.customLinks && updatedUser.customLinks.length > 0);
                        
@@ -298,7 +297,7 @@ module.exports = async (req, res) => {
 
       if (linkPointsDiff !== 0) {
         if (!updatedUser.points) updatedUser.points = { total: 0 };
-        const engagementField = updatedUser.role === "student" ? "studentEngagement" : "alumniParticipation";
+        const engagementField = "profileCompletion";
         
         updatedUser.points.total = Math.max(0, (updatedUser.points.total || 0) + linkPointsDiff);
         updatedUser.points[engagementField] = Math.max(0, (updatedUser.points[engagementField] || 0) + linkPointsDiff);
