@@ -35,16 +35,10 @@ module.exports = async (req, res) => {
     // Fetch current user to check existing points statuses
     const currentUser = await User.findById(req.user.id);
     
-    // 🔒 Prevent resetting pointsStatus if already approved (prevents double points loop)
-    if (currentUser && currentUser.resumePointsStatus === "approved" && updates.resumePointsStatus) {
-      delete updates.resumePointsStatus;
-    }
-    if (currentUser && currentUser.githubPointsStatus === "approved" && updates.githubPointsStatus) {
-      delete updates.githubPointsStatus;
-    }
-    if (currentUser && currentUser.portfolioPointsStatus === "approved" && updates.portfolioPointsStatus) {
-      delete updates.portfolioPointsStatus;
-    }
+    // 🔒 We no longer trust frontend pointsStatus for resume/links because it is now automated.
+    delete updates.resumePointsStatus;
+    delete updates.githubPointsStatus;
+    delete updates.portfolioPointsStatus;
 
     if (profileImage) {
       updates.profilePicture = profileImage;
@@ -267,6 +261,75 @@ module.exports = async (req, res) => {
           }
         } catch (noteErr) {
           console.error("❌ Failed to send skills points notice:", noteErr.message);
+        }
+      }
+
+      // 🔗 Automatic Points Logic for Links and Resume
+      let linkPointsDiff = 0;
+      let linkReasons = [];
+
+      // 1. Resume Link Check
+      const hasResume = updatedUser.resume && updatedUser.resume.trim().length > 0;
+      if (hasResume && updatedUser.resumePointsStatus !== "approved") {
+        updatedUser.resumePointsStatus = "approved";
+        linkPointsDiff += 10;
+        linkReasons.push("Adding Resume Link");
+      } else if (!hasResume && updatedUser.resumePointsStatus === "approved") {
+        updatedUser.resumePointsStatus = "none";
+        linkPointsDiff -= 10;
+        linkReasons.push("Removing Resume Link");
+      }
+
+      // 2. Links Check (LinkedIn, GitHub, Portfolio, CustomLinks)
+      const hasLinks = (updatedUser.linkedin && updatedUser.linkedin !== "Not linked") || 
+                       (updatedUser.github && updatedUser.github.trim().length > 0) ||
+                       (updatedUser.portfolio && updatedUser.portfolio.trim().length > 0) ||
+                       (updatedUser.customLinks && updatedUser.customLinks.length > 0);
+                       
+      if (hasLinks && updatedUser.portfolioPointsStatus !== "approved") {
+        updatedUser.portfolioPointsStatus = "approved";
+        linkPointsDiff += 10;
+        linkReasons.push("Adding External Links");
+      } else if (!hasLinks && updatedUser.portfolioPointsStatus === "approved") {
+        updatedUser.portfolioPointsStatus = "none";
+        linkPointsDiff -= 10;
+        linkReasons.push("Removing External Links");
+      }
+
+      if (linkPointsDiff !== 0) {
+        if (!updatedUser.points) updatedUser.points = { total: 0 };
+        const engagementField = updatedUser.role === "student" ? "studentEngagement" : "alumniParticipation";
+        
+        updatedUser.points.total = Math.max(0, (updatedUser.points.total || 0) + linkPointsDiff);
+        updatedUser.points[engagementField] = Math.max(0, (updatedUser.points[engagementField] || 0) + linkPointsDiff);
+        
+        updatedUser.markModified('points');
+        await updatedUser.save();
+
+        try {
+          const Notification = require("../../../../models/Notification");
+          const typeStr = linkPointsDiff > 0 ? "points_earned" : "points_deducted";
+          
+          const newNotification = new Notification({
+            sender: updatedUser._id,
+            receiver: updatedUser._id,
+            type: typeStr,
+            message: `You ${linkPointsDiff > 0 ? 'earned' : 'lost'} ${Math.abs(linkPointsDiff)} point(s) for ${linkReasons.join(" and ")}.`,
+          });
+          await newNotification.save();
+
+          if (req.io) {
+            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded");
+            req.io.to(updatedUser._id.toString()).emit("newNotification", populatedNotification);
+            
+            req.io.to(updatedUser._id.toString()).emit("pointsUpdated", {
+              awardedPoints: linkPointsDiff,
+              reason: linkReasons.join(" & "),
+              totalPoints: updatedUser.points.total
+            });
+          }
+        } catch (noteErr) {
+          console.error("❌ Failed to send links/resume points notice:", noteErr.message);
         }
       }
     }

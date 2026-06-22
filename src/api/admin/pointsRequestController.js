@@ -244,15 +244,8 @@ const approvePointsRequest = async (req, res) => {
 
 const getPendingProfilePointsRequests = async (req, res) => {
   try {
-    const users = await User.find({
-      $or: [
-        { resumePointsStatus: "pending" },
-        { githubPointsStatus: "pending" },
-        { portfolioPointsStatus: "pending" }
-      ]
-    }).select("name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded enrollmentNumber course semester resume github portfolio resumePointsStatus githubPointsStatus portfolioPointsStatus");
-
-    res.json(users);
+    // 🔗 Points for Resume and Links are now fully automated. Return empty.
+    res.json([]);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch profile points requests" });
   }
