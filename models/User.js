@@ -50,6 +50,7 @@ const CertificateSchema = new mongoose.Schema({
   name: { type: String, required: true },
   issuer: String,
   issueDate: String,
+  duration: String,
   credentialUrl: String,
   proofImage: String,
 });
