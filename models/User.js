@@ -50,6 +50,7 @@ const CertificateSchema = new mongoose.Schema({
   name: { type: String, required: true },
   issuer: String,
   issueDate: String,
+  credentialUrl: String,
   proofImage: String,
 });
 
@@ -208,6 +209,7 @@ const UserSchema = new mongoose.Schema(
     commentPointLogs: [{ type: Date }], // Dates when comment points were awarded
     profileCompletionAwarded: { type: Boolean, default: false },
     pointsAwardedForSkills: { type: Number, default: 0 }, // Tracks points given for skills
+    pointsAwardedForCertificates: { type: Number, default: 0 }, // Tracks points given for certificates
     eventPointsAwarded: [{ type: mongoose.Schema.Types.ObjectId, ref: "Event" }],
     lastLoginPointAwardedAt: { type: Date }, // Tracking for daily login points
 
