@@ -32,8 +32,28 @@ module.exports = async (req, res) => {
       ...rest,
     };
     
-    // Fetch current user to check existing points statuses
+    // Fetch current user to check existing points statuses and media
     const currentUser = await User.findById(req.user.id);
+    
+    // 🧹 Delete old Cloudinary experience images if they were removed
+    if (currentUser && updates.experience && Array.isArray(updates.experience)) {
+      const oldProofImages = currentUser.experience.map(e => e.proofImage).filter(img => img && img.includes("res.cloudinary.com"));
+      const newProofImages = updates.experience.map(e => e.proofImage).filter(img => img && img.includes("res.cloudinary.com"));
+      
+      const deletedImages = oldProofImages.filter(img => !newProofImages.includes(img));
+      
+      for (const imgUrl of deletedImages) {
+        const publicId = extractPublicId(imgUrl, false);
+        if (publicId) {
+          try {
+            await cloudinary.uploader.destroy(publicId, { invalidate: true });
+            console.log(`🗑 Deleted old Cloudinary experience proof: ${publicId}`);
+          } catch (err) {
+            console.error(`❌ Failed to delete experience proof from Cloudinary (${publicId}):`, err);
+          }
+        }
+      }
+    }
     
     // 🔒 We no longer trust frontend pointsStatus for resume/links because it is now automated.
     delete updates.resumePointsStatus;
@@ -293,6 +313,20 @@ module.exports = async (req, res) => {
         updatedUser.portfolioPointsStatus = "none";
         linkPointsDiff -= 10;
         linkReasons.push("Removing External Links");
+      }
+
+      // 3. Experience/Internship Check
+      // Condition: User has at least 1 experience entry AND at least 1 entry has a proofImage
+      const hasValidExperience = updatedUser.experience && updatedUser.experience.some(exp => exp.proofImage && exp.proofImage.trim().length > 0);
+      
+      if (hasValidExperience && updatedUser.experiencePointsStatus !== "approved") {
+        updatedUser.experiencePointsStatus = "approved";
+        linkPointsDiff += 10;
+        linkReasons.push("Adding Experience/Internship Proof");
+      } else if (!hasValidExperience && updatedUser.experiencePointsStatus === "approved") {
+        updatedUser.experiencePointsStatus = "none";
+        linkPointsDiff -= 10;
+        linkReasons.push("Removing Experience/Internship Proof");
       }
 
       if (linkPointsDiff !== 0) {

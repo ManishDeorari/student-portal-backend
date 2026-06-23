@@ -170,6 +170,7 @@ const UserSchema = new mongoose.Schema(
     resumePointsStatus: { type: String, enum: ["none", "pending", "approved", "rejected"], default: "none" },
     githubPointsStatus: { type: String, enum: ["none", "pending", "approved", "rejected"], default: "none" },
     portfolioPointsStatus: { type: String, enum: ["none", "pending", "approved", "rejected"], default: "none" },
+    experiencePointsStatus: { type: String, enum: ["none", "pending", "approved", "rejected"], default: "none" },
 
     // Networking connections
     connections: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
