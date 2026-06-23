@@ -7,7 +7,16 @@ const getPosts = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const type = req.query.type || "Regular";
-    const userId = req.query.userId;
+    let userId = req.query.userId;
+    
+    // Resolve publicId to ObjectId if necessary
+    if (userId && userId.length !== 24) {
+        const User = require("../../../../models/User");
+        const userObj = await User.findOne({ publicId: userId });
+        if (userObj) {
+            userId = userObj._id;
+        }
+    }
     
     let filter = {};
     // === "ALL" FETCHING LOGIC ===
