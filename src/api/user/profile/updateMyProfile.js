@@ -305,7 +305,9 @@ module.exports = async (req, res) => {
       }
 
       // ✅ Automatic Certificates Points Logic (Max 10, 2 points per certificate)
-      const currentCertsCount = updatedUser.certificates ? updatedUser.certificates.length : 0;
+      const currentCertsCount = updatedUser.certificates 
+        ? updatedUser.certificates.filter(cert => cert.proofImage && cert.proofImage.includes("res.cloudinary.com")).length 
+        : 0;
       const newEligibleCertPoints = Math.min(currentCertsCount * 2, 10);
       const currentAwardedCerts = updatedUser.pointsAwardedForCertificates || 0;
       const certPointsDifference = newEligibleCertPoints - currentAwardedCerts;
