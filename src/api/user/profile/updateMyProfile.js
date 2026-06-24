@@ -434,6 +434,67 @@ module.exports = async (req, res) => {
           console.error("❌ Failed to send links/resume points notice:", noteErr.message);
         }
       }
+
+      // ✅ Automatic Projects Points Logic (Max 10, 5 points per project with a link, max 2)
+      if (updates.projects !== undefined) {
+        // Auto-sort projects by startDate descending (newest first)
+        if (Array.isArray(updatedUser.projects)) {
+          updatedUser.projects.sort((a, b) => {
+            const dateA = a.startDate ? new Date(a.startDate) : new Date(0);
+            const dateB = b.startDate ? new Date(b.startDate) : new Date(0);
+            return dateB - dateA;
+          });
+          updatedUser.markModified('projects');
+          await updatedUser.save();
+        }
+      }
+
+      const eligibleProjects = (updatedUser.projects || [])
+        .filter(p => p.link && p.link.trim().length > 0)
+        .slice(0, 2); // Max 2 projects count for points
+      
+      const newEligibleProjectPoints = eligibleProjects.length * 5;
+      const currentAwardedProjects = updatedUser.pointsAwardedForProjects || 0;
+      const projectPointsDifference = newEligibleProjectPoints - currentAwardedProjects;
+
+      if (projectPointsDifference !== 0) {
+        if (!updatedUser.points) updatedUser.points = { total: 0 };
+        const engagementField = "profileCompletion";
+        
+        updatedUser.points.total = Math.max(0, (updatedUser.points.total || 0) + projectPointsDifference);
+        updatedUser.points[engagementField] = Math.max(0, (updatedUser.points[engagementField] || 0) + projectPointsDifference);
+        updatedUser.pointsAwardedForProjects = newEligibleProjectPoints;
+        
+        updatedUser.markModified('points');
+        await updatedUser.save();
+
+        try {
+          const Notification = require("../../../../models/Notification");
+          const typeStr = projectPointsDifference > 0 ? "points_earned" : "points_deducted";
+          const actionStr = projectPointsDifference > 0 ? "adding projects with links to your profile" : "removing project links from your profile";
+          
+          const newNotification = new Notification({
+            sender: updatedUser._id,
+            receiver: updatedUser._id,
+            type: typeStr,
+            message: `You ${projectPointsDifference > 0 ? 'earned' : 'lost'} ${Math.abs(projectPointsDifference)} point(s) for ${actionStr}.`,
+          });
+          await newNotification.save();
+
+          if (req.io) {
+            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded");
+            req.io.to(updatedUser._id.toString()).emit("newNotification", populatedNotification);
+            
+            req.io.to(updatedUser._id.toString()).emit("pointsUpdated", {
+              awardedPoints: projectPointsDifference,
+              reason: projectPointsDifference > 0 ? "Projects Added" : "Projects Removed",
+              totalPoints: updatedUser.points.total
+            });
+          }
+        } catch (noteErr) {
+          console.error("❌ Failed to send project points notice:", noteErr.message);
+        }
+      }
     }
 
     res.json(updatedUser);

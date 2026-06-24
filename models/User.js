@@ -57,11 +57,14 @@ const CertificateSchema = new mongoose.Schema({
 
 const ProjectSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  description: String,
-  startDate: String,
-  endDate: String,
+  goal: { type: String, required: true },
+  description: { type: String },
+  startDate: { type: String },
+  endDate: { type: String },
+  isOngoing: { type: Boolean, default: false },
   toolsUsed: [String],
   link: String,
+  isLinkPublic: { type: Boolean, default: false },
 });
 
 const ResearchPaperSchema = new mongoose.Schema({
@@ -211,6 +214,7 @@ const UserSchema = new mongoose.Schema(
     profileCompletionAwarded: { type: Boolean, default: false },
     pointsAwardedForSkills: { type: Number, default: 0 }, // Tracks points given for skills
     pointsAwardedForCertificates: { type: Number, default: 0 }, // Tracks points given for certificates
+    pointsAwardedForProjects: { type: Number, default: 0 }, // Tracks points given for projects
     eventPointsAwarded: [{ type: mongoose.Schema.Types.ObjectId, ref: "Event" }],
     lastLoginPointAwardedAt: { type: Date }, // Tracking for daily login points
 
