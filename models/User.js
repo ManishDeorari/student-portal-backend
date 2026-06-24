@@ -185,7 +185,7 @@ const UserSchema = new mongoose.Schema(
     // Role & Permission
     role: {
       type: String,
-      enum: ["student", "faculty", "admin"],
+      enum: ["student", "alumni", "faculty", "admin"],
       default: "student",
     },
     isAdmin: {
