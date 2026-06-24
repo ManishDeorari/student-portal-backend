@@ -58,7 +58,7 @@ const CertificateSchema = new mongoose.Schema({
 
 const ProjectSchema = new mongoose.Schema({
   title: { type: String, required: true },
-  domain: { type: String, required: true },
+  domain: { type: String, default: "" },
   goal: { type: String, required: true },
   description: { type: String },
   startDate: { type: String },
