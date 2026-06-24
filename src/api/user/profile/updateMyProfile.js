@@ -385,17 +385,18 @@ module.exports = async (req, res) => {
       }
 
       // 3. Experience/Internship Check
-      // Condition: User has at least 1 experience entry AND at least 1 entry has a proofImage
-      const hasValidExperience = updatedUser.experience && updatedUser.experience.some(exp => exp.proofImage && exp.proofImage.trim().length > 0);
-      
-      if (hasValidExperience && updatedUser.experiencePointsStatus !== "approved") {
-        updatedUser.experiencePointsStatus = "approved";
-        linkPointsDiff += 10;
-        linkReasons.push("Adding Experience/Internship Proof");
-      } else if (!hasValidExperience && updatedUser.experiencePointsStatus === "approved") {
-        updatedUser.experiencePointsStatus = "none";
-        linkPointsDiff -= 10;
-        linkReasons.push("Removing Experience/Internship Proof");
+      // Condition: +10 per entry with a valid proofImage, max 3 entries = 30 pts
+      const experienceWithProof = (updatedUser.experience || []).filter(exp => exp.proofImage && exp.proofImage.trim().length > 0);
+      const newExperiencePoints = Math.min(experienceWithProof.length, 3) * 10;
+      const currentExperiencePoints = updatedUser.pointsAwardedForExperience || 0;
+      const experiencePointsDiff = newExperiencePoints - currentExperiencePoints;
+
+      if (experiencePointsDiff !== 0) {
+        updatedUser.pointsAwardedForExperience = newExperiencePoints;
+        linkPointsDiff += experiencePointsDiff;
+        linkReasons.push(experiencePointsDiff > 0 ? "Adding Experience/Internship Proof" : "Removing Experience/Internship Proof");
+        // Clear old binary status field
+        updatedUser.experiencePointsStatus = newExperiencePoints > 0 ? "approved" : "none";
       }
 
       if (linkPointsDiff !== 0) {
@@ -435,7 +436,7 @@ module.exports = async (req, res) => {
         }
       }
 
-      // ✅ Automatic Projects Points Logic (Max 10, 5 points per project with a link, max 2)
+      // ✅ Automatic Projects Points Logic (Max 30, 10 points per project with a link, max 3)
       if (updates.projects !== undefined) {
         // Auto-sort projects: Ongoing first, then by endDate descending, then by order of addition
         if (Array.isArray(updatedUser.projects)) {
@@ -469,9 +470,9 @@ module.exports = async (req, res) => {
 
       const eligibleProjects = (updatedUser.projects || [])
         .filter(p => p.link && p.link.trim().length > 0)
-        .slice(0, 2); // Max 2 projects count for points
+        .slice(0, 3); // Max 3 projects count for points
       
-      const newEligibleProjectPoints = eligibleProjects.length * 5;
+      const newEligibleProjectPoints = eligibleProjects.length * 10;
       const currentAwardedProjects = updatedUser.pointsAwardedForProjects || 0;
       const projectPointsDifference = newEligibleProjectPoints - currentAwardedProjects;
 
@@ -511,6 +512,72 @@ module.exports = async (req, res) => {
           }
         } catch (noteErr) {
           console.error("❌ Failed to send project points notice:", noteErr.message);
+        }
+      }
+
+      // ✅ Automatic Research Papers Points Logic (Max 60, 20 points per paper with a link, max 3)
+      if (updates.researchPapers !== undefined) {
+        // Auto-sort papers by publishDate descending
+        if (Array.isArray(updatedUser.researchPapers)) {
+          const indexedPapers = updatedUser.researchPapers.map((p, index) => ({ p, index }));
+          indexedPapers.sort((aObj, bObj) => {
+            const dateA = aObj.p.publishDate ? new Date(aObj.p.publishDate) : new Date(0);
+            const dateB = bObj.p.publishDate ? new Date(bObj.p.publishDate) : new Date(0);
+            if (dateB.getTime() !== dateA.getTime()) {
+              return dateB.getTime() - dateA.getTime();
+            }
+            return aObj.index - bObj.index;
+          });
+          updatedUser.researchPapers = indexedPapers.map(obj => obj.p);
+          updatedUser.markModified('researchPapers');
+          await updatedUser.save();
+        }
+      }
+
+      const eligiblePapers = (updatedUser.researchPapers || [])
+        .filter(p => p.link && p.link.trim().length > 0)
+        .slice(0, 3); // Max 3 papers count for points
+      
+      const newEligiblePaperPoints = eligiblePapers.length * 20;
+      const currentAwardedPapers = updatedUser.pointsAwardedForPapers || 0;
+      const paperPointsDifference = newEligiblePaperPoints - currentAwardedPapers;
+
+      if (paperPointsDifference !== 0) {
+        if (!updatedUser.points) updatedUser.points = { total: 0 };
+        const engagementField = "profileCompletion";
+        
+        updatedUser.points.total = Math.max(0, (updatedUser.points.total || 0) + paperPointsDifference);
+        updatedUser.points[engagementField] = Math.max(0, (updatedUser.points[engagementField] || 0) + paperPointsDifference);
+        updatedUser.pointsAwardedForPapers = newEligiblePaperPoints;
+        
+        updatedUser.markModified('points');
+        await updatedUser.save();
+
+        try {
+          const Notification = require("../../../../models/Notification");
+          const typeStr = paperPointsDifference > 0 ? "points_earned" : "points_deducted";
+          const actionStr = paperPointsDifference > 0 ? "adding research papers/patents with links to your profile" : "removing research/patent links from your profile";
+          
+          const newNotification = new Notification({
+            sender: updatedUser._id,
+            receiver: updatedUser._id,
+            type: typeStr,
+            message: `You ${paperPointsDifference > 0 ? 'earned' : 'lost'} ${Math.abs(paperPointsDifference)} point(s) for ${actionStr}.`,
+          });
+          await newNotification.save();
+
+          if (req.io) {
+            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded");
+            req.io.to(updatedUser._id.toString()).emit("newNotification", populatedNotification);
+            
+            req.io.to(updatedUser._id.toString()).emit("pointsUpdated", {
+              awardedPoints: paperPointsDifference,
+              reason: paperPointsDifference > 0 ? "Publications Added" : "Publications Removed",
+              totalPoints: updatedUser.points.total
+            });
+          }
+        } catch (noteErr) {
+          console.error("❌ Failed to send research paper points notice:", noteErr.message);
         }
       }
     }
