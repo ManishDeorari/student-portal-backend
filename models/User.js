@@ -49,6 +49,7 @@ const ExperienceSchema = new mongoose.Schema({
 const CertificateSchema = new mongoose.Schema({
   name: { type: String, required: true },
   issuer: String,
+  description: String,
   issueDate: String,
   duration: String,
   credentialUrl: String,
@@ -57,6 +58,7 @@ const CertificateSchema = new mongoose.Schema({
 
 const ProjectSchema = new mongoose.Schema({
   title: { type: String, required: true },
+  domain: { type: String, required: true },
   goal: { type: String, required: true },
   description: { type: String },
   startDate: { type: String },

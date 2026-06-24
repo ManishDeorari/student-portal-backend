@@ -437,13 +437,31 @@ module.exports = async (req, res) => {
 
       // ✅ Automatic Projects Points Logic (Max 10, 5 points per project with a link, max 2)
       if (updates.projects !== undefined) {
-        // Auto-sort projects by startDate descending (newest first)
+        // Auto-sort projects: Ongoing first, then by endDate descending, then by order of addition
         if (Array.isArray(updatedUser.projects)) {
-          updatedUser.projects.sort((a, b) => {
-            const dateA = a.startDate ? new Date(a.startDate) : new Date(0);
-            const dateB = b.startDate ? new Date(b.startDate) : new Date(0);
-            return dateB - dateA;
+          // Add original index for stable sort
+          const indexedProjects = updatedUser.projects.map((p, index) => ({ p, index }));
+          
+          indexedProjects.sort((aObj, bObj) => {
+            const a = aObj.p;
+            const b = bObj.p;
+            
+            if (a.isOngoing && !b.isOngoing) return -1;
+            if (!a.isOngoing && b.isOngoing) return 1;
+            
+            if (!a.isOngoing && !b.isOngoing) {
+              const dateA = a.endDate ? new Date(a.endDate) : new Date(0);
+              const dateB = b.endDate ? new Date(b.endDate) : new Date(0);
+              if (dateB.getTime() !== dateA.getTime()) {
+                return dateB.getTime() - dateA.getTime();
+              }
+            }
+            
+            // Both ongoing OR both same end date -> retain order of addition
+            return aObj.index - bObj.index;
           });
+          
+          updatedUser.projects = indexedProjects.map(obj => obj.p);
           updatedUser.markModified('projects');
           await updatedUser.save();
         }
