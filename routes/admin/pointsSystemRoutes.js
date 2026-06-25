@@ -281,6 +281,14 @@ router.post("/trigger-rollover", authenticate, verifyMainAdmin, async (req, res)
             user.resumePointsStatus = "none";
             user.githubPointsStatus = "none";
             user.portfolioPointsStatus = "none";
+            
+            // Reset dynamic profile points
+            user.pointsAwardedForSkills = 0;
+            user.pointsAwardedForAchievements = 0;
+            user.pointsAwardedForExperience = 0;
+            user.pointsAwardedForProjects = 0;
+            user.pointsAwardedForPapers = 0;
+            user.pointsAwardedForCertificates = 0;
 
             // Re-evaluate profile completion for the new year
             const hasProfilePic = user.profilePicture && !user.profilePicture.includes("default-profile.jpg");
@@ -290,6 +298,8 @@ router.post("/trigger-rollover", authenticate, verifyMainAdmin, async (req, res)
             const hasWhatsApp = user.whatsapp && user.whatsapp !== "Not linked";
             const hasLinkedIn = user.linkedin && user.linkedin !== "Not linked";
             const hasBio = user.bio && user.bio.trim().length > 0;
+            const hasSecondaryEmail = user.secondaryEmail && user.secondaryEmail.trim().length > 0;
+            const hasUniversityRollNumber = user.universityRollNumber && user.universityRollNumber.trim().length > 0;
 
             const MANDATORY_DEGREES = [
                 "High School (Secondary - Class 10)",
@@ -307,7 +317,7 @@ router.post("/trigger-rollover", authenticate, verifyMainAdmin, async (req, res)
             const hasEducation = completedMandatoryCount >= 3;
 
             const isCompleted = hasProfilePic && hasBanner && hasPhone && hasAddress &&
-                hasWhatsApp && hasLinkedIn && hasBio && hasEducation;
+                hasWhatsApp && hasLinkedIn && hasBio && hasSecondaryEmail && hasUniversityRollNumber && hasEducation;
 
             if (isCompleted) {
                 const awardAmount = config ? (config.profileCompletionPoints || 50) : 50;
@@ -327,6 +337,28 @@ router.post("/trigger-rollover", authenticate, verifyMainAdmin, async (req, res)
                 } catch (noteErr) {
                     console.error("Failed to re-award profile completion notice on rollover:", noteErr.message);
                 }
+            }
+
+            // Calculate dynamic profile points
+            const skillsPts = Math.min(user.profileSkills?.length || 0, 10);
+            const achievementsPts = Math.min((user.achievements?.length || 0) * 15, 45);
+            const experiencePts = Math.min((user.experience?.length || 0) * 15, 45);
+            const projectsPts = Math.min((user.projects?.length || 0) * 15, 45);
+            const papersPts = Math.min((user.papers?.length || 0) * 15, 45);
+            const certPts = Math.min((user.certificates?.length || 0) * 15, 45);
+
+            const totalDynamicPts = skillsPts + achievementsPts + experiencePts + projectsPts + papersPts + certPts;
+
+            if (totalDynamicPts > 0) {
+                user.pointsAwardedForSkills = skillsPts;
+                user.pointsAwardedForAchievements = achievementsPts;
+                user.pointsAwardedForExperience = experiencePts;
+                user.pointsAwardedForProjects = projectsPts;
+                user.pointsAwardedForPapers = papersPts;
+                user.pointsAwardedForCertificates = certPts;
+
+                user.points.total = (user.points.total || 0) + totalDynamicPts;
+                user.points.profileCompletion = (user.points.profileCompletion || 0) + totalDynamicPts;
             }
 
             await user.save();

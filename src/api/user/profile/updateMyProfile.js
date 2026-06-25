@@ -194,6 +194,9 @@ module.exports = async (req, res) => {
       const hasJobPreferences = updatedUser.jobPreferences &&
         (updatedUser.jobPreferences.functionalArea || updatedUser.jobPreferences.preferredLocations?.length > 0);
 
+      const hasSecondaryEmail = updatedUser.secondaryEmail && updatedUser.secondaryEmail.trim().length > 0;
+      const hasUniversityRollNumber = updatedUser.role === "alumni" ? true : (updatedUser.universityRollNumber && updatedUser.universityRollNumber.trim().length > 0);
+
       const isCompleted = hasProfilePic && hasBanner && hasPhone && hasAddress &&
         hasWhatsApp && hasLinkedIn && hasBio && hasEducation && hasSecondaryEmail && hasUniversityRollNumber;
 
