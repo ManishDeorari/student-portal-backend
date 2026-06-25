@@ -115,6 +115,7 @@ const EducationSchema = new mongoose.Schema({
 
 const SkillSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  category: { type: String, default: "Other" },
   endorsements: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
 });
 
