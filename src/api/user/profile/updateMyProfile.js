@@ -75,6 +75,26 @@ module.exports = async (req, res) => {
       }
     }
     
+    // 🧹 Delete old Cloudinary achievement images if they were removed
+    if (currentUser && updates.achievements && Array.isArray(updates.achievements)) {
+      const oldProofImages = currentUser.achievements.map(e => e.proofImage).filter(img => img && img.includes("res.cloudinary.com"));
+      const newProofImages = updates.achievements.map(e => e.proofImage).filter(img => img && img.includes("res.cloudinary.com"));
+      
+      const deletedImages = oldProofImages.filter(img => !newProofImages.includes(img));
+      
+      for (const imgUrl of deletedImages) {
+        const publicId = extractPublicId(imgUrl, false);
+        if (publicId) {
+          try {
+            await cloudinary.uploader.destroy(publicId, { invalidate: true });
+            console.log(`🗑 Deleted old Cloudinary achievement proof: ${publicId}`);
+          } catch (err) {
+            console.error(`❌ Failed to delete achievement proof from Cloudinary (${publicId}):`, err);
+          }
+        }
+      }
+    }
+    
     // 🔒 We no longer trust frontend pointsStatus for resume/links because it is now automated.
     delete updates.resumePointsStatus;
     delete updates.githubPointsStatus;
@@ -578,6 +598,62 @@ module.exports = async (req, res) => {
           }
         } catch (noteErr) {
           console.error("❌ Failed to send research paper points notice:", noteErr.message);
+        }
+      }
+      
+      // ✅ Automatic Achievements Points Logic (Max 45, 15 points per achievement with proof image or link, max 3)
+      if (updates.achievements !== undefined) {
+        if (Array.isArray(updatedUser.achievements)) {
+          updatedUser.achievements = updates.achievements;
+          updatedUser.markModified('achievements');
+          await updatedUser.save();
+        }
+      }
+
+      const eligibleAchievements = (updatedUser.achievements || [])
+        .filter(a => (a.link && a.link.trim().length > 0) || (a.proofImage && a.proofImage.trim().length > 0))
+        .slice(0, 3); // Max 3 achievements count for points
+      
+      const newEligibleAchievementPoints = eligibleAchievements.length * 15;
+      const currentAwardedAchievements = updatedUser.pointsAwardedForAchievements || 0;
+      const achievementPointsDifference = newEligibleAchievementPoints - currentAwardedAchievements;
+
+      if (achievementPointsDifference !== 0) {
+        if (!updatedUser.points) updatedUser.points = { total: 0 };
+        const engagementField = "profileCompletion";
+        
+        updatedUser.points.total = Math.max(0, (updatedUser.points.total || 0) + achievementPointsDifference);
+        updatedUser.points[engagementField] = Math.max(0, (updatedUser.points[engagementField] || 0) + achievementPointsDifference);
+        updatedUser.pointsAwardedForAchievements = newEligibleAchievementPoints;
+        
+        updatedUser.markModified('points');
+        await updatedUser.save();
+
+        try {
+          const Notification = require("../../../../models/Notification");
+          const typeStr = achievementPointsDifference > 0 ? "points_earned" : "points_deducted";
+          const actionStr = achievementPointsDifference > 0 ? "adding verified achievements to your profile" : "removing verified achievements from your profile";
+          
+          const newNotification = new Notification({
+            sender: updatedUser._id,
+            receiver: updatedUser._id,
+            type: typeStr,
+            message: `You ${achievementPointsDifference > 0 ? 'earned' : 'lost'} ${Math.abs(achievementPointsDifference)} point(s) for ${actionStr}.`,
+          });
+          await newNotification.save();
+
+          if (req.io) {
+            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded");
+            req.io.to(updatedUser._id.toString()).emit("newNotification", populatedNotification);
+            
+            req.io.to(updatedUser._id.toString()).emit("pointsUpdated", {
+              awardedPoints: achievementPointsDifference,
+              reason: achievementPointsDifference > 0 ? "Achievements Added" : "Achievements Removed",
+              totalPoints: updatedUser.points.total
+            });
+          }
+        } catch (noteErr) {
+          console.error("❌ Failed to send achievement points notice:", noteErr.message);
         }
       }
     }

@@ -84,6 +84,9 @@ const AchievementSchema = new mongoose.Schema({
   description: String,
   date: String,
   proofImage: String,
+  isProofPublic: { type: Boolean, default: false },
+  link: String,
+  isLinkPublic: { type: Boolean, default: false },
 });
 
 const CustomLinkSchema = new mongoose.Schema({
@@ -221,6 +224,7 @@ const UserSchema = new mongoose.Schema(
     pointsAwardedForExperience: { type: Number, default: 0 }, // Tracks points given for experience
     pointsAwardedForProjects: { type: Number, default: 0 }, // Tracks points given for projects
     pointsAwardedForPapers: { type: Number, default: 0 }, // Tracks points given for research papers
+    pointsAwardedForAchievements: { type: Number, default: 0 }, // Tracks points given for achievements
     eventPointsAwarded: [{ type: mongoose.Schema.Types.ObjectId, ref: "Event" }],
     lastLoginPointAwardedAt: { type: Date }, // Tracking for daily login points
 
