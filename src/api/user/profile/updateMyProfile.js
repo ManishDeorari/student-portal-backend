@@ -116,6 +116,7 @@ module.exports = async (req, res) => {
         );
         return {
           name: newSkill.name,
+          category: newSkill.category || (existing ? existing.category : "Other"),
           endorsements: existing ? existing.endorsements : []
         };
       });
