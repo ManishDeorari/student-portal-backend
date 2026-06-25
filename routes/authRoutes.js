@@ -155,35 +155,24 @@ router.post("/signup", async (req, res) => {
 // ======================== LOGIN ==========================
 router.post("/login", async (req, res) => {
   try {
-    const { email, enrollmentNumber, employeeId, password, identifier } = req.body;
+    const { email, password, identifier } = req.body;
 
-    // Support both old format (email/enrollmentNumber) and new format (identifier)
-    let loginQuery = {};
-    if (identifier) {
-      loginQuery = {
-        $or: [
-          { email: identifier },
-          { enrollmentNumber: identifier },
-          { employeeId: identifier }
-        ]
-      };
-    } else if (email) {
-      loginQuery = { email };
-    } else if (enrollmentNumber) {
-      loginQuery = { enrollmentNumber };
-    } else if (employeeId) {
-      loginQuery = { employeeId };
-    } else {
-      return res.status(400).json({ message: "Email or ID is required" });
+    // Email-only login — enrollment number and employee ID are no longer accepted
+    const loginEmail = identifier || email;
+
+    if (!loginEmail) {
+      return res.status(400).json({ message: "Email is required" });
     }
 
-    console.log("🔐 Login attempt with query:", loginQuery);
+    const loginQuery = { email: loginEmail };
+
+    console.log("🔐 Login attempt for:", loginEmail);
 
     const user = await User.findOne(loginQuery);
-    if (!user) return res.status(400).json({ message: "Invalid email/ID or password" });
+    if (!user) return res.status(400).json({ message: "Invalid email or password" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid email/ID or password" });
+    if (!isMatch) return res.status(400).json({ message: "Invalid email or password" });
 
     if (!user.approved && user.role !== "admin" && user.role !== "student") {
       return res.status(403).json({ message: "Your account has not been approved by admin yet." });
@@ -213,11 +202,11 @@ router.post("/login", async (req, res) => {
     );
 
     // Record login activity
-      await recordActivity(user._id);
+    await recordActivity(user._id);
 
-      res.json({
-        message: "Login successful",
-        token,
+    res.json({
+      message: "Login successful",
+      token,
       user: {
         id: user._id,
         name: user.name,
