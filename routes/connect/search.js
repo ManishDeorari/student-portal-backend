@@ -5,7 +5,7 @@ const authMiddleware = require("../../middleware/authMiddleware");
 const User = require("../../models/User");
 
 router.get("/", authMiddleware, async (req, res) => {
-  const { query, course, year, industry, skills } = req.query;
+  const { query, course, year, semester, branch, section, department, position, industry, skills } = req.query;
 
   try {
     const currentUserId = req.user._id;
@@ -54,6 +54,22 @@ router.get("/", authMiddleware, async (req, res) => {
 
     if (conditions.length > 0) {
       filter.$and = conditions;
+    }
+
+    if (semester) {
+      filter.semester = String(semester);
+    }
+    if (branch) {
+      filter.branch = new RegExp(`^${branch}$`, "i");
+    }
+    if (section) {
+      filter.section = new RegExp(`^${section}$`, "i");
+    }
+    if (department) {
+      filter.department = new RegExp(department, "i");
+    }
+    if (position) {
+      filter.position = new RegExp(position, "i");
     }
 
     if (industry) filter["workProfile.industry"] = { $regex: new RegExp(industry, "i") };
