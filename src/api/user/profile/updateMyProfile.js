@@ -169,7 +169,7 @@ module.exports = async (req, res) => {
       const hasLinkedIn = updatedUser.linkedin && updatedUser.linkedin !== "Not linked";
       const hasBio = updatedUser.bio && updatedUser.bio.trim().length > 0;
       const hasSecondaryEmail = updatedUser.secondaryEmail && updatedUser.secondaryEmail.trim().length > 0;
-      const hasUniversityRollNumber = updatedUser.universityRollNumber && updatedUser.universityRollNumber.trim().length > 0;
+      const hasUniversityRollNumber = updatedUser.role === "alumni" ? true : (updatedUser.universityRollNumber && updatedUser.universityRollNumber.trim().length > 0);
 
       // ✅ Revised Education Logic: Mandatory 4 Levels
       const MANDATORY_DEGREES = [
@@ -194,8 +194,7 @@ module.exports = async (req, res) => {
       const hasJobPreferences = updatedUser.jobPreferences &&
         (updatedUser.jobPreferences.functionalArea || updatedUser.jobPreferences.preferredLocations?.length > 0);
 
-      const hasSecondaryEmail = updatedUser.secondaryEmail && updatedUser.secondaryEmail.trim().length > 0;
-      const hasUniversityRollNumber = updatedUser.role === "alumni" ? true : (updatedUser.universityRollNumber && updatedUser.universityRollNumber.trim().length > 0);
+
 
       const isCompleted = hasProfilePic && hasBanner && hasPhone && hasAddress &&
         hasWhatsApp && hasLinkedIn && hasBio && hasEducation && hasSecondaryEmail && hasUniversityRollNumber;
