@@ -109,6 +109,7 @@ const EducationSchema = new mongoose.Schema({
   endYear: Number,
   courseYearKey: { type: String, index: true },
   grade: String,
+  isOngoing: { type: Boolean, default: false },
   activities: { type: String, maxlength: 500 },
   description: { type: String, maxlength: 1000 },
 });
