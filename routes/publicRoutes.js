@@ -27,7 +27,7 @@ router.get("/testimonials", async (req, res) => {
 router.get("/stats", async (req, res) => {
   try {
     const [userCount, eventCount, postCount] = await Promise.all([
-      User.countDocuments(),
+      User.countDocuments({ role: "student", approved: true }),
       Event.countDocuments(),
       Post.countDocuments()
     ]);
