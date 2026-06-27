@@ -13,7 +13,13 @@ const enrollmentNumberRegex = /^PV-H\d+$/;
 // ======================== SIGNUP ==========================
 router.post("/signup", async (req, res) => {
   try {
-    const { name, email, password, enrollmentNumber, employeeId, role, position, department, course, semester, section, branch } = req.body;
+    let { name, email, password, enrollmentNumber, employeeId, role, position, department, course, semester, section, branch } = req.body;
+
+    // Normalize email domain to lowercase while preserving local part case
+    if (email && email.includes("@")) {
+      const parts = email.split("@");
+      email = parts[0] + "@" + parts[1].toLowerCase();
+    }
 
     // Validation
     if (!name || !email || !password || !role) {
@@ -29,8 +35,8 @@ router.post("/signup", async (req, res) => {
       return res.status(400).json({ message: "Only @gehu.ac.in email addresses are allowed for sign up." });
     }
 
-    // Check for unique email
-    const existingUser = await User.findOne({ email });
+    // Check for unique email (case-insensitive)
+    const existingUser = await User.findOne({ email: new RegExp('^' + email + '$', 'i') });
     if (existingUser)
       return res.status(409).json({ message: "User already exists with this email" });
 
@@ -164,7 +170,7 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Email is required" });
     }
 
-    const loginQuery = { email: loginEmail };
+    const loginQuery = { email: new RegExp('^' + loginEmail + '$', 'i') };
 
     console.log("🔐 Login attempt for:", loginEmail);
 
@@ -265,13 +271,13 @@ router.post("/forgot-password", async (req, res) => {
     const { email } = req.body;
 
     // 🛡 Security: Prevent password reset for the main admin
-    if (email === "manishdeorari377@gmail.com") {
+    if (email && email.toLowerCase() === "manishdeorari377@gmail.com") {
       return res.status(403).json({
         message: "Password reset is not allowed for this account via the automated system. Please contact the system developer."
       });
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: new RegExp('^' + email + '$', 'i') });
 
     if (!user) {
       return res.status(404).json({ message: "User with this email does not exist" });
@@ -305,7 +311,7 @@ router.post("/reset-password-with-otp", async (req, res) => {
     }
 
     const user = await User.findOne({
-      email,
+      email: new RegExp('^' + email + '$', 'i'),
       resetPasswordOTP: otp,
       resetPasswordExpires: { $gt: Date.now() }, // Check if not expired
     });
