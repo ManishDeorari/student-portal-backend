@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const bcrypt = require("bcryptjs");
 const User = require("../models/User");
 const Post = require("../models/Post");
 const Group = require("../models/Group");
@@ -712,7 +713,8 @@ router.put("/update-user/:id", authenticate, verifyAdmin, verifyMainAdmin, async
       position, 
       department,
       enrollmentNumber,
-      employeeId
+      employeeId,
+      newPassword
     } = req.body;
 
     const user = await User.findById(req.params.id);
@@ -731,6 +733,15 @@ router.put("/update-user/:id", authenticate, verifyAdmin, verifyMainAdmin, async
       if (position) user.position = position;
       if (department) user.department = department;
       if (employeeId) user.employeeId = employeeId;
+    }
+
+    if (newPassword) {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      if (!passwordRegex.test(newPassword)) {
+        return res.status(400).json({ message: "Password must be at least 8 characters long, contain at least one uppercase letter, one lowercase letter, one number, and one special character" });
+      }
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      user.password = hashedPassword;
     }
 
     await user.save();
