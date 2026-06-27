@@ -23,6 +23,9 @@ module.exports = async (req, res) => {
       filter.role = role;
     }
 
+    // Only return approved users
+    filter.approved = true;
+
     const users = await User.find(filter)
     .select("name publicId enrollmentNumber profilePicture profileImageFocus bannerImageFocus role course semester")
     .limit(10);

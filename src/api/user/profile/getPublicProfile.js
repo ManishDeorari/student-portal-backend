@@ -17,6 +17,11 @@ module.exports = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
+    // Block non-admins from viewing pending profiles
+    if (!user.approved && (!req.user || req.user.role !== "admin")) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     // Assign the definitive object ID for internal relationship queries down the chain
     const targetUserId = user._id;
 

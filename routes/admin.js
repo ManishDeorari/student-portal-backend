@@ -56,7 +56,7 @@ router.get("/pending-users", authenticate, verifyAdmin, async (req, res) => {
 // ✅ 1.5 Get all users (for User Management tab) - RESTRICTED TO MAIN ADMIN
 router.get("/all-users", authenticate, verifyAdmin, verifyMainAdmin, async (req, res) => {
   try {
-    const users = await User.find({}).select("-password").sort({ name: 1 });
+    const users = await User.find({ approved: true }).select("-password").sort({ name: 1 });
     res.json(users);
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch all users" });
@@ -541,6 +541,7 @@ router.get("/admins", authenticate, verifyAdmin, async (req, res) => {
       const users = await User.find({
         role: { $in: ["faculty", "admin"] },
         isMainAdmin: { $ne: true }, // 🚀 exclude main admin
+        approved: true,
       }).select("name email role isAdmin employeeId position department profilePicture");
       res.json(users);
     } catch (err) {

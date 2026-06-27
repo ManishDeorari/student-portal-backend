@@ -2,7 +2,7 @@ const User = require("../../../../models/User");
 
 module.exports = async (req, res) => {
   try {
-    const users = await User.find().select("-password");
+    const users = await User.find({ approved: true }).select("-password");
     res.json(users);
   } catch (error) {
     console.error("❌ Error fetching users:", error.message);
