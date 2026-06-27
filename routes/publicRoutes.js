@@ -33,9 +33,9 @@ router.get("/stats", async (req, res) => {
     ]);
 
     res.status(200).json({
-      users: userCount || 10, // Fallbacks so it never looks empty initially
-      events: eventCount || 5,
-      posts: postCount || 20
+      users: userCount || 260, // Fallbacks so it never looks empty initially
+      events: eventCount || 15,
+      posts: postCount || 120
     });
   } catch (error) {
     console.error("❌ Error fetching stats:", error);
