@@ -61,7 +61,7 @@ router.get("/", authMiddleware, async (req, res) => {
         { "workProfile.industry": currentUser.workProfile?.industry }
       ]
     })
-      .select("name course profilePicture profileImageFocus bannerImageFocus enrollmentNumber workProfile skills")
+      .select("name course profilePicture profileImageFocus bannerImageFocus enrollmentNumber workProfile skills profileCompletionAwarded")
       .limit(6);
 
     res.json({
