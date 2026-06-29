@@ -6,19 +6,18 @@ const crypto = require("crypto");
 const User = require("../models/User");
 
 const router = express.Router();
-const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])[A-Za-z\d\W_]{8,}$/;
 // Enrollment number must follow format: PV-H followed by digits only (e.g. PV-H209001)
 const enrollmentNumberRegex = /^PV-H\d+$/;
 
 // ======================== SIGNUP ==========================
 router.post("/signup", async (req, res) => {
   try {
-    let { name, email, password, enrollmentNumber, employeeId, role, position, department, course, semester, section, branch } = req.body;
+    let { name, email, password, enrollmentNumber, universityRollNumber, employeeId, role, position, department, course, semester, section, branch } = req.body;
 
-    // Normalize email domain to lowercase while preserving local part case
-    if (email && email.includes("@")) {
-      const parts = email.split("@");
-      email = parts[0] + "@" + parts[1].toLowerCase();
+    // Normalize entire email to lowercase
+    if (email) {
+      email = email.toLowerCase();
     }
 
     // Validation
@@ -40,9 +39,9 @@ router.post("/signup", async (req, res) => {
     if (existingUser)
       return res.status(409).json({ message: "User already exists with this email" });
 
-    // Student must have enrollment number
-    if (role === "student" && !enrollmentNumber) {
-      return res.status(400).json({ message: "Enrollment number is required for student" });
+    // Student must have enrollment number and university roll number
+    if (role === "student" && (!enrollmentNumber || !universityRollNumber)) {
+      return res.status(400).json({ message: "Enrollment number and University Roll Number are required for students" });
     }
 
     // Validate enrollment number format (must be PV-H followed by digits, e.g. PV-H209001)
@@ -110,18 +109,12 @@ router.post("/signup", async (req, res) => {
     // Create new user
     const newUser = new User({
       name,
-      publicId,
       email,
       password: hashedPassword,
+      publicId,
       role,
-      enrollmentNumber: role === "student" ? enrollmentNumber : undefined,
-      employeeId: role === "faculty" ? employeeId : undefined,
-      position: (role === "faculty" || role === "admin") ? position : undefined,
-      department: (role === "faculty" || role === "admin") ? department : undefined,
-      course: role === "student" ? course : undefined,
-      semester: role === "student" ? semester : undefined,
-      section: role === "student" ? section : undefined,
-      branch: role === "student" ? branch : undefined,
+      ...(role === "student" && { enrollmentNumber, universityRollNumber, course, semester, section, branch }),
+      ...(role === "faculty" && { employeeId, position, department }),
       isAdmin: false,
       approved: false,
     });
@@ -147,6 +140,8 @@ router.post("/signup", async (req, res) => {
       const field = Object.keys(err.keyPattern || {})[0];
       if (field === "enrollmentNumber") {
         return res.status(409).json({ message: "This enrollment number is already registered. Please check your enrollment number or login instead." });
+      } else if (field === "universityRollNumber") {
+        return res.status(409).json({ message: "This University Roll Number is already registered. Please check your roll number or login instead." });
       } else if (field === "email") {
         return res.status(409).json({ message: "This email address is already registered. Please use a different email or login instead." });
       } else if (field === "employeeId") {
@@ -161,7 +156,11 @@ router.post("/signup", async (req, res) => {
 // ======================== LOGIN ==========================
 router.post("/login", async (req, res) => {
   try {
-    const { email, password, identifier } = req.body;
+    let { email, password, identifier } = req.body;
+
+    // Normalize login email/identifier to lowercase
+    if (identifier) identifier = identifier.toLowerCase();
+    if (email) email = email.toLowerCase();
 
     // Email-only login — enrollment number and employee ID are no longer accepted
     const loginEmail = identifier || email;
@@ -268,10 +267,11 @@ const { sendOTPEmail } = require("../utils/emailService");
 // ======================== FORGOT PASSWORD (OTP) ==========================
 router.post("/forgot-password", async (req, res) => {
   try {
-    const { email } = req.body;
+    let { email } = req.body;
+    if (email) email = email.toLowerCase();
 
     // 🛡 Security: Prevent password reset for the main admin
-    if (email && email.toLowerCase() === "manishdeorari377@gmail.com") {
+    if (email && email === "manishdeorari377@gmail.com") {
       return res.status(403).json({
         message: "Password reset is not allowed for this account via the automated system. Please contact the system developer."
       });
@@ -304,7 +304,8 @@ router.post("/forgot-password", async (req, res) => {
 // ======================== RESET PASSWORD WITH OTP ==========================
 router.post("/reset-password-with-otp", async (req, res) => {
   try {
-    const { email, otp, newPassword } = req.body;
+    let { email, otp, newPassword } = req.body;
+    if (email) email = email.toLowerCase();
 
     if (!email || !otp || !newPassword) {
       return res.status(400).json({ message: "All fields are required" });

@@ -135,8 +135,9 @@ const UserSchema = new mongoose.Schema(
     email: { type: String, unique: true, required: true },
     password: { type: String, required: true },
 
-    // Student-only field
+    // Student-only fields
     enrollmentNumber: { type: String, unique: true, sparse: true },
+    universityRollNumber: { type: String, unique: true, sparse: true },
 
     // Faculty-only field
     employeeId: { type: String, unique: true, sparse: true },
@@ -155,7 +156,6 @@ const UserSchema = new mongoose.Schema(
     bannerImage: String,
     bannerImageFocus: { x: Number, y: Number },
     secondaryEmail: String,
-    universityRollNumber: String,
     branch: String,
 
     // Detailed Profile Fields
