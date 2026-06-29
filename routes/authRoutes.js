@@ -65,6 +65,16 @@ router.post("/signup", async (req, res) => {
       }
     }
 
+    // Check if university roll number is already taken
+    if (role === "student" && universityRollNumber) {
+      const existingRollNumber = await User.findOne({ universityRollNumber });
+      if (existingRollNumber) {
+        return res.status(409).json({
+          message: `University Roll Number '${universityRollNumber}' is already registered. Please use a different roll number or login if you already have an account.`
+        });
+      }
+    }
+
     // Faculty must have employee ID
     if (role === "faculty" && !employeeId) {
       return res.status(400).json({ message: "Employee ID is required for faculty" });

@@ -137,7 +137,7 @@ const UserSchema = new mongoose.Schema(
 
     // Student-only fields
     enrollmentNumber: { type: String, unique: true, sparse: true },
-    universityRollNumber: { type: String, unique: true, sparse: true },
+    universityRollNumber: { type: String },
 
     // Faculty-only field
     employeeId: { type: String, unique: true, sparse: true },

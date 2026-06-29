@@ -32,6 +32,17 @@ module.exports = async (req, res) => {
       ...rest,
     };
     
+    // Check for university roll number uniqueness
+    if (updates.universityRollNumber) {
+      const existingUser = await User.findOne({
+        universityRollNumber: updates.universityRollNumber,
+        _id: { $ne: req.user.id }
+      });
+      if (existingUser) {
+        return res.status(409).json({ message: "This University Roll Number is already registered by another user." });
+      }
+    }
+
     // Fetch current user to check existing points statuses and media
     const currentUser = await User.findById(req.user.id);
     
