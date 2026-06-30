@@ -15,10 +15,12 @@ router.post("/signup", async (req, res) => {
   try {
     let { name, email, password, enrollmentNumber, universityRollNumber, employeeId, role, position, department, course, semester, section, branch } = req.body;
 
-    // Normalize entire email to lowercase
-    if (email) {
-      email = email.toLowerCase();
-    }
+    // Trim and normalize inputs
+    if (name) name = name.trim();
+    if (email) email = email.trim().toLowerCase();
+    if (enrollmentNumber) enrollmentNumber = enrollmentNumber.trim();
+    if (universityRollNumber) universityRollNumber = universityRollNumber.trim();
+    if (employeeId) employeeId = employeeId.trim();
 
     // Validation
     if (!name || !email || !password || !role) {
@@ -88,6 +90,10 @@ router.post("/signup", async (req, res) => {
           message: `Employee ID '${employeeId}' is already registered. Please use a different ID or login if you already have an account.`
         });
       }
+    }
+
+    if (password.length > 128) {
+      return res.status(400).json({ message: "Password cannot exceed 128 characters" });
     }
 
     if (!passwordRegex.test(password)) {
@@ -168,15 +174,19 @@ router.post("/login", async (req, res) => {
   try {
     let { email, password, identifier } = req.body;
 
-    // Normalize login email/identifier to lowercase
-    if (identifier) identifier = identifier.toLowerCase();
-    if (email) email = email.toLowerCase();
+    // Trim and Normalize login email/identifier to lowercase
+    if (identifier) identifier = identifier.trim().toLowerCase();
+    if (email) email = email.trim().toLowerCase();
 
     // Email-only login — enrollment number and employee ID are no longer accepted
     const loginEmail = identifier || email;
 
     if (!loginEmail) {
       return res.status(400).json({ message: "Email is required" });
+    }
+
+    if (password && password.length > 128) {
+      return res.status(400).json({ message: "Invalid email or password" }); // Generic error to not leak info
     }
 
     const loginQuery = { email: new RegExp('^' + loginEmail + '$', 'i') };
