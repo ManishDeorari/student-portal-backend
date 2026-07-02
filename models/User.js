@@ -54,6 +54,7 @@ const CertificateSchema = new mongoose.Schema({
   duration: String,
   credentialUrl: String,
   proofImage: String,
+  isPrivate: { type: Boolean, default: false },
 });
 
 const ProjectSchema = new mongoose.Schema({
