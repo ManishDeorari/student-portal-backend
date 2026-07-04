@@ -47,7 +47,7 @@ const createEvent = async (req, res) => {
       startTime,
       timezone: timezone || "IST",
       endDate,
-      registrationCloseDate: eventType === "no_registration" ? undefined : registrationCloseDate,
+      registrationCloseDate,
       documents: documents || [],
       eventType: eventType || "online_registration",
       pointsAssigned: pointsAssigned ? Number(pointsAssigned) : 0,
