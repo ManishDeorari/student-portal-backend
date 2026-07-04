@@ -6,26 +6,7 @@ module.exports = async (req, res) => {
   try {
     const { oldImageUrl, profileImage, profileImageFocus, ...rest } = req.body;
 
-    // 🧹 Delete old Cloudinary image if present & not default
-    if (
-      oldImageUrl &&
-      oldImageUrl.includes("res.cloudinary.com") &&
-      !oldImageUrl.includes("default-profile.jpg")
-    ) {
-      const isRaw = oldImageUrl.includes("/raw/");
-      const publicId = extractPublicId(oldImageUrl, isRaw);
-      if (publicId) {
-        try {
-          await cloudinary.uploader.destroy(publicId, { 
-             invalidate: true, 
-             resource_type: isRaw ? "raw" : "image" 
-          });
-          console.log(`🗑 Deleted old Cloudinary file: ${publicId}`);
-        } catch (err) {
-          console.error("❌ Failed to delete old file from Cloudinary:", err);
-        }
-      }
-    }
+    // Note: Cloudinary image deletion has been moved to the bottom, after the DB is successfully updated.
 
     // ✅ Update user profile picture in DB only if provided
     const updates = {
@@ -668,6 +649,28 @@ module.exports = async (req, res) => {
           }
         } catch (noteErr) {
           console.error("❌ Failed to send achievement points notice:", noteErr.message);
+        }
+      }
+    }
+
+    // 🧹 Safe Cleanup: Delete old Cloudinary image (profile or banner) ONLY AFTER DB is successfully updated
+    if (
+      oldImageUrl &&
+      oldImageUrl.includes("res.cloudinary.com") &&
+      !oldImageUrl.includes("default-profile.jpg") &&
+      !oldImageUrl.includes("default_banner.jpg")
+    ) {
+      const isRaw = oldImageUrl.includes("/raw/");
+      const publicId = extractPublicId(oldImageUrl, isRaw);
+      if (publicId) {
+        try {
+          await cloudinary.uploader.destroy(publicId, { 
+             invalidate: true, 
+             resource_type: isRaw ? "raw" : "image" 
+          });
+          console.log(`🗑 Deleted old Cloudinary file safely after DB update: ${publicId}`);
+        } catch (err) {
+          console.error("❌ Failed to delete old file from Cloudinary:", err);
         }
       }
     }
