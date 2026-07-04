@@ -96,6 +96,34 @@ const createPost = async (req, res) => {
       );
     }
 
+    // ✅ NEW: Notification to original Event Owner on EventRepost
+    if (finalType === "EventRepost" && eventRepostDetails?.originalEventId) {
+      try {
+        const EventModel = mongoose.models.Event || mongoose.model("Event");
+        const origEvent = await EventModel.findById(eventRepostDetails.originalEventId).select("createdBy title");
+        if (origEvent && origEvent.createdBy) {
+          const Notification = require("../../../../models/Notification");
+          const creatorName = populated.user?.name || "A user";
+          const newNotification = new Notification({
+            sender: req.user._id || req.user.id,
+            receiver: origEvent.createdBy,
+            type: "event_repost",
+            message: `${creatorName} reposted your event: "${origEvent.title || "Event"}"`,
+            postId: post._id,
+          });
+          await newNotification.save();
+          if (req.io) {
+            const populatedNotification = await Notification.findById(newNotification._id).populate("sender", "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded");
+            const targetRoom = origEvent.createdBy.toString();
+            req.io.to(targetRoom).emit("newNotification", populatedNotification);
+            req.io.to(targetRoom).emit("liveNotification", populatedNotification);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to notify original event owner on repost:", e);
+      }
+    }
+
     // ✅ Award Points Logic
     if (userRole === "student") {
       try {
