@@ -40,6 +40,7 @@ const getPosts = async (req, res) => {
         const regCount = await Registration.countDocuments({ eventId: e._id });
         let isRegistered = false;
         let myRegistration = null;
+        let myRepostId = null;
         if (req.user) {
           const reqUserId = req.user._id || req.user.id;
           const reg = await Registration.findOne({ eventId: e._id, userId: reqUserId });
@@ -47,9 +48,13 @@ const getPosts = async (req, res) => {
             isRegistered = true;
             myRegistration = reg.toObject({ flattenMaps: true });
           }
+          const repost = await Post.findOne({ type: "EventRepost", "eventRepostDetails.originalEventId": e._id, user: reqUserId }).select("_id");
+          if (repost) {
+            myRepostId = repost._id.toString();
+          }
         }
         const ev = e.toObject ? e.toObject({ flattenMaps: true }) : e;
-        return { ...ev, content: ev.description, user: ev.createdBy, type: "Event", registrationCount: regCount, isRegistered, myRegistration };
+        return { ...ev, content: ev.description, user: ev.createdBy, type: "Event", registrationCount: regCount, isRegistered, myRegistration, myRepostId };
       }));
       
       const sortType = req.query.sort || "newest";

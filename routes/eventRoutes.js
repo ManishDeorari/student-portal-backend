@@ -6,6 +6,7 @@ const auth = require("../middleware/authMiddleware");
 const createEvent = require("../src/api/events/event/createEvent");
 const { getEvents, getEventById } = require("../src/api/events/event/getEvents");
 const deleteEvent = require("../src/api/events/event/deleteEvent");
+const getEventReposts = require("../src/api/events/repost/getEventReposts");
 const { 
   reactToEvent, 
   commentOnEvent, 
@@ -25,6 +26,9 @@ router.get("/", auth, getEvents);
 
 // ---------------- GET SINGLE EVENT ----------------
 router.get("/:id", auth, getEventById);
+
+// ---------------- GET EVENT REPOSTS (Admin/Faculty only) ----------------
+router.get("/:id/reposts", auth, getEventReposts);
 
 // ---------------- CREATE EVENT (Admin only) ----------------
 router.post("/", auth, createEvent);
