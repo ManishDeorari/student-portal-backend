@@ -1,5 +1,6 @@
 const Event = require("../../../../models/Event");
 const Registration = require("../../../../models/Registration");
+const Post = require("../../../../models/Post");
 
 const getEvents = async (req, res) => {
   try {
