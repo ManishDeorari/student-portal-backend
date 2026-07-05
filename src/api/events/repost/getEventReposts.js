@@ -12,17 +12,17 @@ const getEventReposts = async (req, res) => {
     const reposts = await Post.find({
       type: "EventRepost",
       "eventRepostDetails.originalEventId": id
-    }).populate("user", "name profilePicture enrollmentNumber branch semester course");
+    })
+      .populate("user", "name profilePicture enrollmentNumber branch semester course")
+      .populate({
+        path: "eventRepostDetails.originalEventId",
+        populate: { path: "createdBy", select: "name profilePicture" }
+      });
 
     // Format to match the registrations response structure for easy frontend handling
     res.json({
       totalCount: reposts.length,
-      reposts: reposts.map(r => ({
-        _id: r._id,
-        user: r.user,
-        createdAt: r.createdAt,
-        content: r.content
-      }))
+      reposts: reposts.map(r => r.toObject ? r.toObject({ flattenMaps: true }) : r)
     });
   } catch (err) {
     console.error("❌ Failed to fetch event reposts:", err);
