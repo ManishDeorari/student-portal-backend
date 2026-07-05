@@ -11,6 +11,7 @@ const getEvents = async (req, res) => {
 
     const eventsWithCounts = await Promise.all(events.map(async (event) => {
       const registrationCount = await Registration.countDocuments({ eventId: event._id });
+      const repostCount = await Post.countDocuments({ type: "EventRepost", "eventRepostDetails.originalEventId": event._id });
       let isRegistered = false;
       let myRegistration = null;
       let myRepostId = null;
@@ -21,7 +22,6 @@ const getEvents = async (req, res) => {
           isRegistered = true;
           myRegistration = reg.toObject({ flattenMaps: true });
         }
-        const Post = require("../../../../models/Post");
         const repost = await Post.findOne({ type: "EventRepost", "eventRepostDetails.originalEventId": event._id, user: reqUserId }).select("_id");
         if (repost) {
           myRepostId = repost._id.toString();
@@ -29,7 +29,7 @@ const getEvents = async (req, res) => {
       }
       // Use toJSON() to ensure reactions (Maps) are converted to plain objects
       const ev = event.toJSON();
-      return { ...ev, content: ev.description, user: ev.createdBy, type: "Event", registrationCount, isRegistered, myRegistration, myRepostId };
+      return { ...ev, content: ev.description, user: ev.createdBy, type: "Event", registrationCount, repostCount, isRegistered, myRegistration, myRepostId };
     }));
 
     res.json({ posts: eventsWithCounts });
@@ -48,6 +48,7 @@ const getEventById = async (req, res) => {
     if (!event) return res.status(404).json({ message: "Event not found" });
 
     const registrationCount = await Registration.countDocuments({ eventId: event._id });
+    const repostCount = await Post.countDocuments({ type: "EventRepost", "eventRepostDetails.originalEventId": event._id });
     
     // Check if the current user is registered or has reposted
     let isRegistered = false;
@@ -60,7 +61,6 @@ const getEventById = async (req, res) => {
         isRegistered = true;
         myRegistration = registration.toObject ? registration.toObject({ flattenMaps: true }) : registration;
       }
-      const Post = require("../../../../models/Post");
       const repost = await Post.findOne({ type: "EventRepost", "eventRepostDetails.originalEventId": event._id, user: reqUserId }).select("_id");
       if (repost) {
         myRepostId = repost._id.toString();
@@ -68,7 +68,7 @@ const getEventById = async (req, res) => {
     }
 
     const ev = event.toJSON();
-    res.json({ ...ev, content: ev.description, user: ev.createdBy, type: "Event", registrationCount, isRegistered, myRegistration, myRepostId });
+    res.json({ ...ev, content: ev.description, user: ev.createdBy, type: "Event", registrationCount, repostCount, isRegistered, myRegistration, myRepostId });
   } catch (error) {
     res.status(500).json({ message: "Error fetching event" });
   }

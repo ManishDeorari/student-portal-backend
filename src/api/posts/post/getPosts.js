@@ -38,6 +38,7 @@ const getPosts = async (req, res) => {
         
       const mappedEvents = await Promise.all(events.map(async (e) => {
         const regCount = await Registration.countDocuments({ eventId: e._id });
+        const repostCount = await Post.countDocuments({ type: "EventRepost", "eventRepostDetails.originalEventId": e._id });
         let isRegistered = false;
         let myRegistration = null;
         let myRepostId = null;
@@ -54,7 +55,7 @@ const getPosts = async (req, res) => {
           }
         }
         const ev = e.toObject ? e.toObject({ flattenMaps: true }) : e;
-        return { ...ev, content: ev.description, user: ev.createdBy, type: "Event", registrationCount: regCount, isRegistered, myRegistration, myRepostId };
+        return { ...ev, content: ev.description, user: ev.createdBy, type: "Event", registrationCount: regCount, repostCount, isRegistered, myRegistration, myRepostId };
       }));
       
       const sortType = req.query.sort || "newest";
