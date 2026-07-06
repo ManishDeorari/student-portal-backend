@@ -84,6 +84,7 @@ const postSchema = new mongoose.Schema({
         groupMembers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
         enrollmentNumber: String,
         course: String,
+        branch: String,
         semester: String,
       }
     ],
