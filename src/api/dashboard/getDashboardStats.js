@@ -54,7 +54,7 @@ const getDashboardStats = async (req, res) => {
           { "announcementDetails.pointsStatus": "approved" },
           { "eventRepostDetails.pointsStatus": "approved" }
         ]
-      });
+      }).select("pointsStatus pointsRequested announcementDetails.pointsStatus announcementDetails.winners eventRepostDetails.pointsStatus type");
       let pointsGivenToday = 0;
       for (const p of pointsPostsToday) {
          if (p.pointsStatus === "approved" && p.pointsRequested) pointsGivenToday += 5; // standard post

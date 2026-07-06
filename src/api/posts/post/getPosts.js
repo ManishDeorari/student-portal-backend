@@ -28,6 +28,7 @@ const getPosts = async (req, res) => {
       
       const postPopulateOptions = require("../utils/populatePost");
       const posts = await Post.find(filter)
+        .select("-announcementDetails.winners -viewedBy")
         .populate(postPopulateOptions);
         
       let eventFilter = userId ? { createdBy: userId } : {};
@@ -117,6 +118,7 @@ const getPosts = async (req, res) => {
 
     const postPopulateOptions = require("../utils/populatePost");
     const posts = await Post.find(filter)
+      .select("-announcementDetails.winners -viewedBy")
       .populate(postPopulateOptions);
 
     let sortedPosts = posts;
