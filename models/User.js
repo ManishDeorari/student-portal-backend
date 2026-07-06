@@ -263,4 +263,8 @@ const UserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// 💡 Indexes for fast querying
+UserSchema.index({ role: 1, _id: 1 });
+UserSchema.index({ firstName: "text", lastName: "text" });
+
 module.exports = mongoose.model("User", UserSchema);

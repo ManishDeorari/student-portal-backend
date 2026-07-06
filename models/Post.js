@@ -181,4 +181,8 @@ postSchema.methods.toJSON = function () {
   return obj;
 };
 
+// 💡 Indexes for fast querying
+postSchema.index({ createdAt: -1 });
+postSchema.index({ user: 1, createdAt: -1 });
+
 module.exports = mongoose.model("Post", postSchema);
