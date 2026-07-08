@@ -33,16 +33,17 @@ const getUserEvents = async (req, res) => {
     }).filter(e => e);
 
     // 2. Fetch participated events from EventReposts
+    const postPopulateOptions = require("../../posts/utils/populatePost");
     const reposts = await Post.find({
       user: targetUserId,
       type: "EventRepost"
-    }).populate({ path: "eventRepostDetails.originalEventId", populate: { path: "createdBy", select: "name profilePicture profileImageFocus bannerImageFocus profileCompletionAwarded publicId" } }).sort({ createdAt: -1 });
+    }).populate(postPopulateOptions).sort({ createdAt: -1 });
 
     const repostedEvents = reposts
       .map(p => {
         if (!p.eventRepostDetails?.originalEventId) return null;
         return {
-          ...p.toObject(),
+          ...p.toObject({ flattenMaps: true }),
           isEventRepostPost: true,
           participationType: "Event Repost",
           title: p.eventRepostDetails?.eventName || p.eventRepostDetails?.originalEventId?.title,
