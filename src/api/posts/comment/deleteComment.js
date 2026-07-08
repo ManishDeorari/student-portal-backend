@@ -50,7 +50,7 @@ const deleteComment = async (req, res) => {
       const config = (await PointsSystemConfig.findOne()) || { commentPoints: 3 };
       
       const commentAuthor = await User.findById(comment.user);
-      if (commentAuthor && commentAuthor.points) {
+      if (commentAuthor && commentAuthor.points && commentAuthor.role === 'student') {
         // Subtract points safely
         commentAuthor.points.total = Math.max(0, (commentAuthor.points.total || 0) - (config.commentPoints || 3));
         

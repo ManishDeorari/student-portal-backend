@@ -105,7 +105,7 @@ const deletePost = async (req, res) => {
       const config = (await PointsSystemConfig.findOne()) || { postPoints: 10 };
       
       const postAuthor = await User.findById(post.user);
-      if (postAuthor && postAuthor.points) {
+      if (postAuthor && postAuthor.points && postAuthor.role === 'student') {
         // Subtract points safely
         postAuthor.points.total = Math.max(0, (postAuthor.points.total || 0) - (config.postPoints || 10));
         

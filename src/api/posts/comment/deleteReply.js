@@ -56,7 +56,7 @@ const deleteReply = async (req, res) => {
       const replyPoints = 2; // Fixed value or config if available
 
       const replyAuthor = await User.findById(reply.user);
-      if (replyAuthor && replyAuthor.points) {
+      if (replyAuthor && replyAuthor.points && replyAuthor.role === 'student') {
         replyAuthor.points.total = Math.max(0, (replyAuthor.points.total || 0) - replyPoints);
         
         if (replyAuthor.points.contentContribution !== undefined) {
