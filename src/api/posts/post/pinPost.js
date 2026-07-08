@@ -21,6 +21,15 @@ const pinPost = async (req, res) => {
       return res.status(403).json({ message: "Only admins can pin posts/events." });
     }
 
+    if (!post.isPinned) {
+      const pinnedPostCount = await Post.countDocuments({ isPinned: true });
+      const pinnedEventCount = await Event.countDocuments({ isPinned: true });
+      
+      if (pinnedPostCount + pinnedEventCount >= 3) {
+        return res.status(400).json({ message: "You can only pin up to 3 posts/events at a time." });
+      }
+    }
+
     post.isPinned = !post.isPinned; // Toggle
     await post.save();
 

@@ -35,6 +35,7 @@ const pinComment = async (req, res) => {
       comment.isPinned = false;
     }
 
+    post.markModified("comments");
     await post.save();
 
     const postPopulateOptions = require("../utils/populatePost");

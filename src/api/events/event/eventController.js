@@ -407,6 +407,7 @@ const pinCommentOnEvent = async (req, res) => {
       comment.isPinned = false;
     }
 
+    event.markModified("comments");
     await event.save();
 
     const updatedEvent = await Event.findById(eventId)

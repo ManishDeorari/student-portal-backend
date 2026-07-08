@@ -52,6 +52,7 @@ const EventSchema = new mongoose.Schema({
     enum: ["online_registration", "no_registration"],
     default: "online_registration"
   },
+  isPinned: { type: Boolean, default: false },
   pointsAssigned: { type: Number, default: 0 },
   tags: [{ type: String }],
   startDate: { type: Date, required: true },
