@@ -125,13 +125,14 @@ const createPost = async (req, res) => {
     }
 
     // ✅ Award Points Logic
-    if (userRole === "student") {
+    if (finalType !== "EventRepost" && (userRole === "student" || userRole === "alumni")) {
       try {
         const user = await User.findById(req.user._id || req.user.id);
-        const config = (await PointsSystemConfig.findOne()) || { postPoints: 10, postLimitCount: 3, postLimitDays: 7 };
-
+        const PointsSystemConfig = require("../../../../models/PointsSystemConfig");
+        const config = (await PointsSystemConfig.findOne()) || { postPoints: 10, maxPostsPerDay: 5 };
+        
         const now = new Date();
-        const limitMs = (config.postLimitDays || 7) * 24 * 60 * 60 * 1000;
+        const limitMs = (config.postLimitHours || 24) * 60 * 60 * 1000;
 
         // Filter logs to find those within the limit window
         const recentLogs = (user.postPointLogs || []).filter(date => (now - new Date(date)) < limitMs);

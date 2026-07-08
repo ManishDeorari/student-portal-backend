@@ -101,8 +101,9 @@ const commentPost = async (req, res) => {
             console.log(`ℹ️ Comment limit reached for user ${user.name}, no points awarded.`);
         }
       } catch (awardErr) {
-        console.error("❌ Failed to award points for comment:", awardErr.message);
+        console.error("❌ Failed to award points", awardErr.message);
       }
+    }
     }
 
     // Return full updated post (✅ Only one response!)

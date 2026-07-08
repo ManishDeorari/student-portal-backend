@@ -91,7 +91,8 @@ const deleteReply = async (req, res) => {
         }
       }
     } catch (revokeErr) {
-      console.error("❌ Failed to revoke points for reply deletion:", revokeErr.message);
+      console.error("❌ Failed to revoke points", revokeErr.message);
+      }
     }
 
     const postPopulateOptions = require("../utils/populatePost");

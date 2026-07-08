@@ -29,6 +29,7 @@ const tipPost = async (req, res) => {
     }
 
     // Check if tipper has enough points
+    if (tipper.role !== "student" && tipper.role !== "alumni") return res.status(403).json({ message: "Only students and alumni can tip." });
     const currentPoints = tipper.points?.total || 0;
     if (currentPoints < amount) {
       return res.status(400).json({ message: "Insufficient points" });

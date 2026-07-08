@@ -63,7 +63,7 @@ const registerEvent = async (req, res) => {
     await registration.save();
 
     // Give points if applicable
-    if (event.eventType === "online_registration" && event.pointsAssigned > 0) {
+    if (event.eventType === "online_registration" && event.pointsAssigned > 0 && (req.user.role === "student" || req.user.role === "alumni")) {
       const awardPointsToUser = async (uId) => {
         const userToUpdate = await User.findById(uId);
         if (userToUpdate && !userToUpdate.eventPointsAwarded?.includes(event._id)) {

@@ -80,8 +80,9 @@ const replyToComment = async (req, res) => {
             console.log(`ℹ️ Comment limit reached for user ${user.name}, no points awarded.`);
         }
       } catch (awardErr) {
-        console.error("❌ Failed to award points for reply:", awardErr.message);
+        console.error("❌ Failed to award points", awardErr.message);
       }
+    }
     }
 
     // Trigger Notification for the comment owner (if the replier is not the comment owner)

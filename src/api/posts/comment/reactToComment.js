@@ -89,8 +89,9 @@ const reactToComment = async (req, res) => {
             console.log(`ℹ️ Like limit reached for user ${user.name}, no points awarded.`);
         }
       } catch (awardErr) {
-        console.error("❌ Failed to award points for comment reaction:", awardErr.message);
+        console.error("❌ Failed to award points", awardErr.message);
       }
+    }
     }
 
     // Trigger Notification for the comment owner
