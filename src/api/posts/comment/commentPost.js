@@ -104,7 +104,7 @@ const commentPost = async (req, res) => {
         console.error("❌ Failed to award points", awardErr.message);
       }
     }
-    }
+    
 
     // Return full updated post (✅ Only one response!)
     res.status(201).json(updatedPost);

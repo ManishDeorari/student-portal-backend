@@ -83,7 +83,7 @@ const replyToComment = async (req, res) => {
         console.error("❌ Failed to award points", awardErr.message);
       }
     }
-    }
+    
 
     // Trigger Notification for the comment owner (if the replier is not the comment owner)
     if (req.user._id.toString() !== comment.user.toString()) {

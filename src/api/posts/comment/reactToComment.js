@@ -92,7 +92,7 @@ const reactToComment = async (req, res) => {
         console.error("❌ Failed to award points", awardErr.message);
       }
     }
-    }
+    
 
     // Trigger Notification for the comment owner
     if (!isSameEmoji && commentOwnerId !== userId) {
