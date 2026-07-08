@@ -76,7 +76,7 @@ router.get("/:id", auth, async (req, res) => {
 
     if (!post) return res.status(404).json({ message: "Post not found" });
 
-    res.json(post.toObject ? post.toObject({ flattenMaps: true }) : post);
+    res.json(post);
   } catch (error) {
     console.error("GET /:id error:", error.message);
     res.status(500).json({ message: "Server error" });

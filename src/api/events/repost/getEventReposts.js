@@ -22,7 +22,7 @@ const getEventReposts = async (req, res) => {
     // Format to match the registrations response structure for easy frontend handling
     res.json({
       totalCount: reposts.length,
-      reposts: reposts.map(r => r.toObject ? r.toObject({ flattenMaps: true }) : r)
+      reposts: reposts.map(r => r.toJSON ? r.toJSON() : r)
     });
   } catch (err) {
     console.error("❌ Failed to fetch event reposts:", err);

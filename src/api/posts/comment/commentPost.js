@@ -107,7 +107,7 @@ const commentPost = async (req, res) => {
     
 
     // Return full updated post (✅ Only one response!)
-    res.status(201).json(updatedPost.toObject ? updatedPost.toObject({ flattenMaps: true }) : updatedPost);
+    res.status(201).json(updatedPost);
   } catch (error) {
     console.error("Comment error:", error.message);
     res.status(500).json({ message: "Failed to comment" });
