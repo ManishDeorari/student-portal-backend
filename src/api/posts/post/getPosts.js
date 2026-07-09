@@ -28,7 +28,7 @@ const getPosts = async (req, res) => {
       
       const postPopulateOptions = require("../utils/populatePost");
       const posts = await Post.find(filter)
-        .select("-announcementDetails.winners -viewedBy")
+        .select("-viewedBy")
         .populate(postPopulateOptions)
         .lean();
         
@@ -119,7 +119,7 @@ const getPosts = async (req, res) => {
 
     const postPopulateOptions = require("../utils/populatePost");
     const posts = await Post.find(filter)
-      .select("-announcementDetails.winners -viewedBy")
+      .select("-viewedBy")
       .populate(postPopulateOptions)
       .lean();
 
