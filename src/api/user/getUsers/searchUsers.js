@@ -27,7 +27,7 @@ module.exports = async (req, res) => {
     filter.approved = true;
 
     const users = await User.find(filter)
-    .select("name publicId enrollmentNumber profilePicture profileImageFocus bannerImageFocus role course semester")
+    .select("name publicId enrollmentNumber profilePicture profileImageFocus bannerImageFocus role course semester branch")
     .limit(10);
 
     res.json(users);
