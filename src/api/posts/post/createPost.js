@@ -41,6 +41,7 @@ const createPost = async (req, res) => {
         achievementCategory: announcementDetails.achievementCategory || "",
         eventName: announcementDetails.eventName || "",
         originalEventId: announcementDetails.originalEventId || undefined,
+        pointsRequested: announcementDetails.pointsRequested || false,
         winners: announcementDetails.winners || [],
       };
 
