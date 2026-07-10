@@ -37,13 +37,15 @@ const createPost = async (req, res) => {
     if (finalType === "Announcement" && announcementDetails) {
       finalAnnouncementDetails = {
         isWinnerAnnouncement: announcementDetails.isWinnerAnnouncement || false,
+        isAchievementAnnouncement: announcementDetails.isAchievementAnnouncement || false,
+        achievementCategory: announcementDetails.achievementCategory || "",
         eventName: announcementDetails.eventName || "",
         originalEventId: announcementDetails.originalEventId || undefined,
         winners: announcementDetails.winners || [],
       };
 
-      // Search for userId by name or uniqueId for winners
-      if (finalAnnouncementDetails.isWinnerAnnouncement && finalAnnouncementDetails.winners.length > 0) {
+      // Search for userId by name or uniqueId for winners/achievers
+      if ((finalAnnouncementDetails.isWinnerAnnouncement || finalAnnouncementDetails.isAchievementAnnouncement) && finalAnnouncementDetails.winners.length > 0) {
         for (let winner of finalAnnouncementDetails.winners) {
           if (winner.uniqueId) {
             const matchedUser = await User.findOne({

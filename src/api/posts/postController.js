@@ -4,6 +4,7 @@ module.exports = {
   createPost: require("./post/createPost"),
   getPosts: require("./post/getPosts"),
   getMyPosts: require("./post/getMyPosts"),
+  getAchievementPosts: require("./post/getAchievementPosts"),
   commentPost: require("./comment/commentPost"),
   replyToComment: require("./comment/replyToComment"),
   deleteComment: require("./comment/deleteComment"),

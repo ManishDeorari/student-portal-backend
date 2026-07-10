@@ -22,6 +22,7 @@ const {
   pinPost,
   incrementViews,
   tipPost,
+  getAchievementPosts,
 } = require("../src/api/posts/postController");
 
 const Post = require("../models/Post"); // Required for GET /posts/:id
@@ -29,6 +30,7 @@ const Post = require("../models/Post"); // Required for GET /posts/:id
 // ---------------- GET ALL POSTS ----------------
 router.get("/", auth, getPosts);
 router.get("/me", auth, getMyPosts);
+router.get("/achievements/:userId", auth, getAchievementPosts);
 
 // ---------------- CREATE POST ----------------
 router.post("/", auth, createPost);

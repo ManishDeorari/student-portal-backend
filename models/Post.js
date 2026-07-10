@@ -68,13 +68,16 @@ const postSchema = new mongoose.Schema({
   pointsStatus: { type: String, enum: ["pending", "approved", "rejected", "none"], default: "none" },
   announcementDetails: {
     isWinnerAnnouncement: { type: Boolean, default: false },
-    eventName: String, // e.g. "Student Meet 2024"
+    isAchievementAnnouncement: { type: Boolean, default: false },
+    achievementCategory: String, // e.g. "Placement", "Internship", "Research Paper", "Other"
+    eventName: String, // e.g. "Student Meet 2024" or Company Name for Achievements
     originalEventId: { type: mongoose.Schema.Types.ObjectId, ref: "Event" },
     winners: [
       {
         name: String,
         rank: String,
         points: Number,
+        roleTitle: String, // NEW: for achievements (e.g. "Software Engineer Intern")
         userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
         uniqueId: String, // PublicId or RegistrationNumber
         profilePicture: String,
