@@ -13,7 +13,7 @@ const downloadCSV = async (req, res) => {
     if (!event) return res.status(404).json({ message: "Event not found" });
 
     const registrations = await Registration.find({ eventId })
-      .populate("userId", "name email enrollmentNumber")
+      .populate("userId", "name email enrollmentNumber publicId")
       .sort({ createdAt: 1 }); // Persistent order by entry time
 
     if (registrations.length === 0) {
@@ -29,7 +29,7 @@ const downloadCSV = async (req, res) => {
     const baseHeaders = baseFields.map(field => capitalizeHeader(field.replace(/([A-Z])/g, ' $1').trim()));
     
     // Core headers
-    let headers = ["Group Name", ...baseHeaders];
+    let headers = ["Group Name", "Public ID", ...baseHeaders];
     
     // Identify if group tracking is needed
     if (event.allowGroupRegistration) {
@@ -56,8 +56,9 @@ const downloadCSV = async (req, res) => {
       }
       const row = [];
 
-      // Prepend Group Name
+      // Prepend Group Name and Public ID
       row.push(`"${groupLabel}"`);
+      row.push(`"${user.publicId || ""}"`);
 
       // 1. Team Lead Data 
       baseFields.forEach(field => {
@@ -86,8 +87,9 @@ const downloadCSV = async (req, res) => {
         reg.groupMembers.forEach(member => {
             const memberRow = [];
             
-            // Prepend Group Name (Persistent for the whole group)
+            // Prepend Group Name and Public ID (Persistent for the whole group)
             memberRow.push(`"${groupLabel}"`);
+            memberRow.push(`"${member.publicId || ""}"`);
 
             // Map member fields to matching baseFields 
             baseFields.forEach(field => {

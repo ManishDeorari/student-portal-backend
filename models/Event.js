@@ -63,15 +63,14 @@ const EventSchema = new mongoose.Schema({
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   registrationFields: {
     name: { type: Boolean, default: true },
-    profileLink: { type: Boolean, default: true },
     enrollmentNumber: { type: Boolean, default: true },
     email: { type: Boolean, default: true },
     phoneNumber: { type: Boolean, default: true },
     course: { type: Boolean, default: true },
-    courseYear: { type: Boolean, default: true },
     branchName: { type: Boolean, default: true },
-    currentCompany: { type: Boolean, default: true },
-    currentCity: { type: Boolean, default: true },
+    semester: { type: Boolean, default: true },
+    session: { type: Boolean, default: true },
+    section: { type: Boolean, default: true },
   },
   customQuestions: [
     {
