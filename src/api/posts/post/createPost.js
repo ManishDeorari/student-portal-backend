@@ -19,9 +19,7 @@ const createPost = async (req, res) => {
     // Role-based validation for post type
     let finalType = "Regular";
     if (type && type !== "Regular") {
-      if (type === "Session" && userRole === "student") {
-        finalType = "Session";
-      } else if (type === "EventRepost" && userRole === "student") {
+      if (type === "EventRepost" && userRole === "student") {
         finalType = "EventRepost";
       } else if (type === "Event" && (userRole === "faculty" || isAdmin)) {
         finalType = "Event";
@@ -71,11 +69,10 @@ const createPost = async (req, res) => {
       video: hasVideo ? video : null,
       documents: Array.isArray(documents) ? documents : [],
       type: finalType,
-      sessionDetails: finalType === "Session" ? sessionDetails : undefined,
       announcementDetails: finalAnnouncementDetails,
       eventRepostDetails: finalType === "EventRepost" ? eventRepostDetails : undefined,
-      pointsRequested: (finalType === "Session" && pointsRequested) || (finalType === "Announcement" && announcementDetails?.pointsRequested) || (finalType === "EventRepost") || false,
-      pointsStatus: ((finalType === "Session" && pointsRequested) || (finalType === "Announcement" && announcementDetails?.pointsRequested) || finalType === "EventRepost") ? "pending" : "none",
+      pointsRequested: (finalType === "Announcement" && announcementDetails?.pointsRequested) || (finalType === "EventRepost") || false,
+      pointsStatus: ((finalType === "Announcement" && announcementDetails?.pointsRequested) || finalType === "EventRepost") ? "pending" : "none",
     });
 
     await post.save();

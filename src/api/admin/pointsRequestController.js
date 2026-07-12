@@ -38,9 +38,7 @@ const approvePointsRequest = async (req, res) => {
       post.pointsStatus = "rejected";
       
       let message = "Your points request was declined by the Admin.";
-      if (post.type === "Session") {
-        message = "Your Student Session points request was declined by the Admin.";
-      } else if (post.announcementDetails && post.type === "Announcement") {
+      if (post.announcementDetails && post.type === "Announcement") {
         const eventName = post.announcementDetails.eventName || "an event";
         message = `Your points request for event "${eventName}" was declined by the Admin.`;
         post.announcementDetails.pointsStatus = "rejected";
@@ -87,45 +85,6 @@ const approvePointsRequest = async (req, res) => {
     if (action === "approve") {
       const senderInfo = { _id: req.user._id, name: req.user.name, profilePicture: req.user.profilePicture };
       post.pointsStatus = "approved"; // Set root status
-
-      // Case 1: Session Post (Points to Owner)
-      if (post.type === "Session") {
-        const PointsSystemConfig = require("../../../models/PointsSystemConfig");
-        const config = await PointsSystemConfig.findOne() || { sessionPoints: 30 };
-        const pointsToAward = awardedPoints !== undefined ? Number(awardedPoints) : (config.sessionPoints || 30);
-
-        const user = await User.findById(post.user);
-        if (user) {
-          if (!user.points) user.points = { total: 0 };
-          user.points.total = (user.points.total || 0) + pointsToAward;
-          user.points.campusEngagement = (user.points.campusEngagement || 0) + pointsToAward;
-          await user.save();
-
-          const newNotification = new Notification({
-            sender: req.user._id,
-            receiver: user._id,
-            type: "points_earned",
-            message: `SESSION_AWARD::${pointsToAward}`,
-            postId: post._id
-          });
-          await newNotification.save();
-
-          if (req.io) {
-            const userRoom = user._id.toString();
-            req.io.to(userRoom).emit("newNotification", { ...newNotification.toObject(), sender: senderInfo });
-            req.io.to(userRoom).emit("pointsUpdated", {
-              totalPoints: user.points.total,
-              awardedPoints: pointsToAward,
-              category: "campusEngagement",
-              reason: "Session Approved"
-            });
-          }
-          
-          post.pointsStatus = "approved";
-          await post.save();
-          return res.json({ message: "Session points approved and awarded" });
-        }
-      }
 
       // Case 2: Announcement Post (Points to Winners)
       if (post.type === "Announcement" && post.announcementDetails) {
