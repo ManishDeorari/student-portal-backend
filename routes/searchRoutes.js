@@ -9,6 +9,7 @@ const Event = require("../models/Event");
 router.get("/", auth, async (req, res) => {
   try {
     const query = req.query.q;
+    const roleParam = req.query.role;
     if (!query || query.trim().length < 2) {
       return res.json({ users: [], posts: [], events: [] });
     }
@@ -16,13 +17,18 @@ router.get("/", auth, async (req, res) => {
     const regex = new RegExp(query, "i");
 
     // Search Users
-    const users = await User.find({
+    const userQuery = {
       $or: [
         { name: regex },
         { enrollmentNumber: regex },
         { "profile.skills": regex }
       ]
-    }).select("name profilePicture profileImageFocus bannerImageFocus role enrollmentNumber branch course semester publicId employeeId department position").limit(5);
+    };
+    if (roleParam) {
+      userQuery.role = roleParam;
+    }
+
+    const users = await User.find(userQuery).select("name profilePicture profileImageFocus bannerImageFocus role enrollmentNumber branch course semester publicId employeeId department position").limit(5);
 
     // Search Posts
     const posts = await Post.find({
